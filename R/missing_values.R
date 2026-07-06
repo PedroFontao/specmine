@@ -1,0 +1,107 @@
+# R/missing_values.R
+
+#' Missing values imputation
+#'
+#' Impute missing values in a dataset using different methods.
+#'
+#' @param dataset Dataset to inspect.
+#' @param method Imputation method: "value", "mean", "median", "knn", or "linapprox".
+#' @param value If method = "value", the value that will replace NAs.
+#' @param k If method = "knn", the number of neighbors.
+#'
+#' @return Dataset with imputed missing values.
+#'
+#' @examples
+#' library(specmine.datasets)
+#' data(propolis)
+#' propolis_proc = missingvalues_imputation(propolis, method = "value", value = 0.0005)
+#'
+#' @export
+"missingvalues_imputation" = function(dataset, method = "value", value = 0.0005, k = 5){
+  if (method == "value"){
+    dataset = impute_nas_value(dataset, value)
+  } 
+  else if (method == "mean"){
+    dataset = impute_nas_mean(dataset)
+  } 
+  else if (method == "median"){
+    dataset = impute_nas_median(dataset)
+  } 
+  else if (method == "knn"){
+    dataset = impute_nas_knn(dataset, k)
+  } 
+  else if (method == "linapprox"){
+    dataset = impute_nas_linapprox(dataset)
+  }
+  add.desc = paste("Missing value imputation with method", method, sep=" ")
+  dataset$description = paste(dataset$description, add.desc, sep="; ")
+  dataset
+}
+
+impute_nas_linapprox <- function(dataset){
+  dataset$data <- imputeTS::na_interpolation(dataset$data, option = "linear")
+  dataset
+}
+
+#' Impute missing values with a constant
+#'
+#' @param dataset Dataset to modify.
+#' @param value Replacement value.
+#'
+#' @return Modified dataset.
+#'
+#' @export
+"impute_nas_value" = function(dataset, value)
+{
+  dataset$data[is.na(dataset$data)] = value
+  dataset
+}
+
+#' Impute missing values with mean
+#'
+#' @param dataset Dataset to modify.
+#'
+#' @return Modified dataset.
+#'
+#' @export
+"impute_nas_mean" = function(dataset){
+  temp = apply(dataset$data, 1, function(x){
+    if(sum(is.na(x))>0){
+      x[is.na(x)] = mean(x, na.rm=TRUE);
+    }
+    x;
+  })
+  dataset$data = t(temp)
+  dataset
+}
+
+#' Impute missing values with median
+#'
+#' @param dataset Dataset to modify.
+#'
+#' @return Modified dataset.
+#'
+#' @export
+"impute_nas_median" = function(dataset) {
+  temp = apply(dataset$data, 1, function(x){
+    if(sum(is.na(x))>0){
+      x[is.na(x)] = median(x,na.rm=TRUE);
+    }
+    x;
+  })
+  dataset$data = t(temp)
+  dataset
+}
+
+#' Impute missing values with kNN
+#'
+#' @param dataset Dataset to modify.
+#' @param k Number of neighbors.
+#'
+#' @param ... TODO.
+#' @return Modified dataset.
+#'
+"impute_nas_knn" = function(dataset, k = 10, ...){
+  dataset$data = impute::impute.knn(dataset$data, ...)$data
+  dataset
+}
