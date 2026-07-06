@@ -1,119 +1,70 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-
-
-
 
 # specmine
 
 <!-- badges: start -->
+
 [![](https://www.r-pkg.org/badges/version/specmine?color=green)](https://cran.r-project.org/package=specmine)
 <!-- badges: end -->
 
-The goal of *specmine* is to provide a set of methods for metabolomics
-data analysis, including data loading in different formats,
-pre-processing, metabolite identification, univariate and multivariate
-data analysis, machine learning, feature selection and pathway analysis.
-Case studies can be found on the website:
-<http://bio.di.uminho.pt/metabolomicspackage/index.html>. This package
-suggests 'rcytoscapejs', a package not in mainstream repositories. If
-you need to install it, use:
-`devtools::install_github('cytoscape/r-cytoscape.js@v0.0.7')`.
+*specmine* is an R package for metabolomics and spectral data analysis.
+It provides methods for data import, preprocessing, visualization,
+univariate and multivariate analysis, machine learning, feature
+selection, and pathway analysis.
 
-## Installation
+Project repository: <https://github.com/PedroFontao/specmine>
 
-You can install the released version of *specmine* from [CRAN](https://CRAN.R-project.org) with:
+This package suggests `rcytoscapejs`, which is not available from
+mainstream repositories. If needed, install it with:
+
+``` r
+devtools::install_github("cytoscape/r-cytoscape.js@v0.0.7")
+#> Warning: `install_github()` was deprecated in devtools 2.5.0.
+#> ℹ Please use pak::pak("user/repo") instead.
+#> This warning is displayed once per session.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
+#> Using GitHub PAT from the git credential store.
+#> Skipping install of 'rcytoscapejs' from a github remote, the SHA1 (8649c7c2) has not changed since last install.
+#>   Use `force = TRUE` to force installation
+```
+
+Installation Install the released version from CRAN:
 
 ``` r
 install.packages("specmine")
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df489b2922'
+#> (as 'lib' is unspecified)
+#> Warning: package 'specmine' is not available for this version of R
+#> 
+#> A version of this package for your version of R might be available elsewhere,
+#> see the ideas at
+#> https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Installing-packages
 ```
 
-And the development version from [GitHub](https://github.com/) with:
+Install the development version from GitHub:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("BioSystemsUM/specmine")
+devtools::install_github("PedroFontao/specmine")
+#> Using GitHub PAT from the git credential store.
+#> Downloading GitHub repo PedroFontao/specmine@HEAD
+#> Skipping 2 packages not available: impute, genefilter
+#> ── R CMD build ─────────────────────────────────────────────────────────────────
+#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/Rtmph7UZdh/remotes143155d81e720/PedroFontao-specmine-c169427/DESCRIPTION’ ... OK
+#> * preparing ‘specmine’:
+#> * checking DESCRIPTION meta-information ... OK
+#> * checking for LF line-endings in source and make files and shell scripts
+#> * checking for empty or unneeded directories
+#> Removed empty directory ‘specmine/system_data’
+#> * building ‘specmine_3.1.7.tar.gz’
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df489b2922'
+#> (as 'lib' is unspecified)
 ```
 
-## Example
-
-This is a basic example which shows you how to load the namespace of
-*specmine* and add it to your search list:
+Example Load the package:
 
 ``` r
 library(specmine)
 ```
-
-## WebSpecmine — Running the App
-
-This repository also includes an extended version of the WebSpecmine
-Shiny application with new unsupervised learning capabilities (UMAP,
-t-SNE, ICA, DBSCAN, HDBSCAN, GMM, Hierarchical Clustering), a
-preprocessing module, and an embedding comparison dashboard.
-
-### Prerequisites
-
-**R** (≥ 4.1.0) and optionally **RStudio**.
-
-### 1. Install the required packages
-
-``` r
-install.packages(c(
-  "shiny",
-  "shinydashboard",
-  "plotly",
-  "DT",
-  "readxl",
-  "uwot",
-  "Rtsne",
-  "fastICA",
-  "dbscan",
-  "mclust"
-))
-```
-
-Install **specmine** from GitHub (see above) if not already installed.
-
-### 2. Clone this repository
-
-``` bash
-git clone https://github.com/PedroFontao/Projeto-Bioinf.git
-cd Projeto-Bioinf
-```
-
-### 3. Run the app
-
-**Option A — RStudio**
-
-Open `app.R` in RStudio and click **Run App**.
-
-**Option B — R console**
-
-``` r
-shiny::runApp("app.R")
-```
-
-**Option C — command line**
-
-``` bash
-Rscript -e "shiny::runApp('app.R')"
-```
-
-The app will open in your browser at `http://127.0.0.1:XXXX`.
-
-### 4. Quick start
-
-1. Go to the **Load Workspace** tab
-2. Select a built-in dataset (iris, wine, cachexia, propolis) or upload your own `.csv` / `.xlsx` file
-3. Use the **Preprocessing** tab to clean and prepare the data
-4. Run embeddings (PCA, UMAP, t-SNE, ICA) in the **Embeddings** tab
-5. Apply clustering (DBSCAN, HDBSCAN, GMM, HC) in the **Clustering** tab
-6. Compare embedding quality metrics in the **Comparison** tab
-
-> **Note:** The new WebSpecmine modules currently operate as a standalone
-> extension and are not yet fully merged into the upstream specmine
-> R package. Supported upload formats: `.csv`, `.tsv`, `.txt`, `.xlsx`, `.xls`.
