@@ -34,7 +34,7 @@ Installation Install the released version from CRAN:
 
 ``` r
 install.packages("specmine")
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df489b2922'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89dfa6e0134'
 #> (as 'lib' is unspecified)
 #> Warning: package 'specmine' is not available for this version of R
 #> 
@@ -52,14 +52,14 @@ devtools::install_github("PedroFontao/specmine")
 #> Downloading GitHub repo PedroFontao/specmine@HEAD
 #> Skipping 2 packages not available: impute, genefilter
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/Rtmph7UZdh/remotes143155d81e720/PedroFontao-specmine-c169427/DESCRIPTION’ ... OK
+#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpsOFoyD/remotes15d345638edec/PedroFontao-specmine-826f9ab/DESCRIPTION’ ... OK
 #> * preparing ‘specmine’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
 #> * checking for empty or unneeded directories
 #> Removed empty directory ‘specmine/system_data’
 #> * building ‘specmine_3.1.7.tar.gz’
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df489b2922'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89dfa6e0134'
 #> (as 'lib' is unspecified)
 ```
 

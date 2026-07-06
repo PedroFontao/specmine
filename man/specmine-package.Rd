@@ -5,7 +5,7 @@
 \alias{specmine-package}
 \title{specmine: Metabolomics and Spectral Data Analysis and Mining}
 \description{
-Provides methods for metabolomics and spectral data analysis, including data import, preprocessing, visualization, univariate and multivariate analysis, machine learning, feature selection, and pathway analysis. The package supports analytical workflows for different data types used in metabolomics and spectroscopy. Case studies and additional documentation are available in the project repository.
+Provides methods for metabolomics and spectral data analysis, including data import, preprocessing, visualization, univariate and multivariate analysis, machine learning, feature selection, and pathway analysis. The package supports analytical workflows for different data types used in metabolomics and spectroscopy. Some optional functionality uses the suggested packages 'rcytoscapejs' and 'specmine.datasets'. The package 'rcytoscapejs' can be installed from https://github.com/cytoscape/r-cytoscape.js.
 
 Package-level imports for specmine.
 }

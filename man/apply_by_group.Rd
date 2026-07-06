@@ -23,9 +23,10 @@ Applies a function to the variables of samples belonging to a given group.
 }
 \examples{
 ## Example of applying a function to a group
-library(specmine.datasets)
-data(cachexia)
-apply.group.result = apply_by_group(cachexia, mean, "Muscle.loss", "control")
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(cachexia, package = "specmine.datasets")
+  apply.group.result = apply_by_group(cachexia, mean, "Muscle.loss", "control")
+}
 
 }
 \keyword{apply}

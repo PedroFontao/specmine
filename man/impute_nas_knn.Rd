@@ -11,7 +11,7 @@ impute_nas_knn(dataset, k = 10, ...)
 
 \item{k}{Number of neighbors.}
 
-\item{...}{TODO.}
+\item{...}{Additional arguments passed to `impute::impute.knn()`.}
 }
 \value{
 Modified dataset.

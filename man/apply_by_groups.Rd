@@ -30,9 +30,10 @@ A table of grouped results.
 Applies a function to groups defined by a metadata variable.
 }
 \examples{
-library(specmine.datasets)
-data(cachexia)
-apply.groups.result = apply_by_groups(cachexia, "Muscle.loss", mean)
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(cachexia, package = "specmine.datasets")
+  apply.groups.result = apply_by_groups(cachexia, "Muscle.loss", mean)
+}
 
 }
 \keyword{apply}

@@ -25,9 +25,10 @@ Aggregate samples according to an aggregate function like mean, median, etc.
 This can be used to merge replicates.
 }
 \examples{
-library(specmine.datasets)
-data(propolis)
-dataset = aggregate_samples(propolis, as.integer(propolis$metadata$seasons), "mean")
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(propolis, package = "specmine.datasets")
+  dataset = aggregate_samples(propolis, as.integer(propolis$metadata$seasons), "mean")
+}
 
 }
 \keyword{aggregation}

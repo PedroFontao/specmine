@@ -22,8 +22,9 @@ Dataset with imputed missing values.
 Impute missing values in a dataset using different methods.
 }
 \examples{
-library(specmine.datasets)
-data(propolis)
-propolis_proc = missingvalues_imputation(propolis, method = "value", value = 0.0005)
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(propolis, package = "specmine.datasets")
+  propolis_proc = missingvalues_imputation(propolis, method = "value", value = 0.0005)
+}
 
 }

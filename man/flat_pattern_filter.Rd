@@ -37,10 +37,11 @@ Filtered dataset.
 Performs a flat pattern filter over the dataset.
 }
 \examples{
-library(specmine.datasets)
-data(propolis)
-propolis_proc = missingvalues_imputation(propolis)
-propolis_proc = flat_pattern_filter(propolis_proc, "iqr",
-  by.percent = TRUE, red.value = 75)
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(propolis, package = "specmine.datasets")
+  propolis_proc = missingvalues_imputation(propolis)
+  propolis_proc = flat_pattern_filter(propolis_proc, "iqr",
+    by.percent = TRUE, red.value = 75)
+}
 
 }

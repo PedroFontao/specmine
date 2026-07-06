@@ -31,11 +31,12 @@ Performs one-way ANOVA for all variables in a dataset.
 }
 \examples{
 ## Example of ANOVA with TukeyHSD
-library(specmine.datasets)
-data(propolis)
-propolis_proc = missingvalues_imputation(propolis)
-propolis_proc = flat_pattern_filter(propolis_proc, "iqr", by.percent = TRUE, red.value = 75)
-result = aov_all_vars(propolis_proc, "seasons", doTukey = FALSE)
+if (requireNamespace("specmine.datasets", quietly = TRUE)) {
+  data(propolis, package = "specmine.datasets")
+  propolis_proc = missingvalues_imputation(propolis)
+  propolis_proc = flat_pattern_filter(propolis_proc, "iqr", by.percent = TRUE, red.value = 75)
+  result = aov_all_vars(propolis_proc, "seasons", doTukey = FALSE)
+}
 
 }
 \keyword{anova}
