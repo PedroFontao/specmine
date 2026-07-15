@@ -12,7 +12,7 @@ This is a new release.
 
 The package was also checked locally on macOS with R CMD check, which completed with 0 errors, 0 warnings, and 0 notes.
 
-The suggested packages `cyjShiny` and `specmine.datasets` are not available in the check environment. `specmine.datasets` is maintained separately at <https://github.com/PedroFontao/specmine.datasets> and has also been submitted to CRAN; I am currently awaiting a response.
+The suggested packages `cyjShiny` and `specmine.datasets` are not available in the check environment. `cyjShiny` is used only for optional functionality. `specmine.datasets` is available on CRAN.
 
 ## Reverse dependencies
 None.

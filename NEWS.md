@@ -1,10 +1,11 @@
 # specmine 3.1.8
 
-- Fixed malformed roxygen example blocks in multiple functions.
-- Improved package documentation for CRAN consistency.
+- Fixed malformed roxygen example blocks.
+- Improved documentation consistency.
+- Updated package metadata.
 
 # specmine 3.1.7
 
 - Fixed CRAN resubmission issues related to optional dependencies.
-- Updated package metadata and repository links.
-- Improved documentation and package checks.
+- Updated repository links and package metadata.
+- Improved package documentation.
