@@ -1,0 +1,15 @@
+^\.github$
+^.*\.Rproj$
+^README\.Rmd$
+^README\.md$
+^README_files$
+^system_data$
+^inst/scripts$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^refactor_backup_orgs_cpds$
+^refactor_backup_spectra_list$
+^output$
+^\.git$
+^\.gitignore$
+^\.Rproj\.user$
