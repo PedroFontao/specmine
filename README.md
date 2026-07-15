@@ -20,18 +20,25 @@ needed, the development version can also be installed from GitHub:
 
 ``` r
 install.packages("cyjShiny")
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df4bf3d01c'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
 #> (as 'lib' is unspecified)
 #> 
 #> The downloaded binary packages are in
-#>  /var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T//RtmpZZ3G1y/downloaded_packages
+#>  /var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T//Rtmp0VWfND/downloaded_packages
 # or
 remotes::install_github("cytoscape/cyjShiny", ref = "master", build_vignettes = TRUE)
 #> Using GitHub PAT from the git credential store.
 #> Downloading GitHub repo cytoscape/cyjShiny@master
+#> xfun (0.59 -> 0.60) [CRAN]
 #> Skipping 1 packages not available: graph
+#> Installing 1 packages: xfun
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
+#> (as 'lib' is unspecified)
+#> 
+#> The downloaded binary packages are in
+#>  /var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T//Rtmp0VWfND/downloaded_packages
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpZZ3G1y/remotes1b445a6e18e7/cytoscape-cyjShiny-594c2a7/DESCRIPTION’ ... OK
+#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/Rtmp0VWfND/remotes892d7ba151d0/cytoscape-cyjShiny-594c2a7/DESCRIPTION’ ... OK
 #> * preparing ‘cyjShiny’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * installing the package (it is needed to build vignettes)
@@ -40,7 +47,7 @@ remotes::install_github("cytoscape/cyjShiny", ref = "master", build_vignettes = 
 #> * checking for empty or unneeded directories
 #> Omitted ‘LazyData’ from DESCRIPTION
 #> * building ‘cyjShiny_1.0.43.tar.gz’
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df4bf3d01c'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
 #> (as 'lib' is unspecified)
 ```
 
@@ -48,7 +55,7 @@ Installation Install the released version from CRAN:
 
 ``` r
 install.packages("specmine")
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df4bf3d01c'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
 #> (as 'lib' is unspecified)
 #> Warning: package 'specmine' is not available for this version of R
 #> 
@@ -69,15 +76,24 @@ devtools::install_github("PedroFontao/specmine")
 #> generated.
 #> Using GitHub PAT from the git credential store.
 #> Downloading GitHub repo PedroFontao/specmine@HEAD
+#> colorspace (2.1-2 -> 2.1-3) [CRAN]
+#> litedown   (0.9   -> 0.10 ) [CRAN]
+#> mvtnorm    (1.4-1 -> 1.4-2) [CRAN]
 #> Skipping 2 packages not available: impute, genefilter
+#> Installing 3 packages: colorspace, litedown, mvtnorm
+#> Installing packages into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
+#> (as 'lib' is unspecified)
+#> 
+#> The downloaded binary packages are in
+#>  /var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T//Rtmp0VWfND/downloaded_packages
 #> ── R CMD build ─────────────────────────────────────────────────────────────────
-#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpZZ3G1y/remotes1b442478d82d/PedroFontao-specmine-c4aa037/DESCRIPTION’ ... OK
+#> * checking for file ‘/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/Rtmp0VWfND/remotes892d352fe341/PedroFontao-specmine-fd865a9/DESCRIPTION’ ... OK
 #> * preparing ‘specmine’:
 #> * checking DESCRIPTION meta-information ... OK
 #> * checking for LF line-endings in source and make files and shell scripts
 #> * checking for empty or unneeded directories
 #> * building ‘specmine_3.1.8.tar.gz’
-#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmpVnMLTT/temp_libpath89df4bf3d01c'
+#> Installing package into '/private/var/folders/y9/p5k4znxj62s8385cyxkjgf6w0000gn/T/RtmptsYwnD/temp_libpath81b5d8161bc'
 #> (as 'lib' is unspecified)
 ```
 
