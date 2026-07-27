@@ -4,27 +4,68 @@
 # each sample is a data frame representing a peak list (with two columns)
 
 # returns a dataset in standard format from all peaks in all samples
+#' Create a dataset from peak lists
+#'
+#' Merges equivalent peaks across samples, extracts intensities, and creates a
+#' dataset object in standard package format.
+#'
+#' @param sample.list A named list of peak tables, one per sample.
+#' @param metadata Optional sample metadata.
+#' @param description Character string with a dataset description.
+#' @param type Character string describing the dataset type.
+#'
+#' @return A dataset object created from the input peak lists.
+#'
+#' @examples
+#' sample.list <- list(
+#'   s1 = data.frame(ppm = c(1.0, 2.0), int = c(10, 20)),
+#'   s2 = data.frame(ppm = c(1.0, 3.0), int = c(15, 30))
+#' )
+#' metadata <- data.frame(class = c("A", "B"), row.names = c("s1", "s2"))
+#' dataset <- dataset_from_peaks(sample.list, metadata = metadata)
+#' class(dataset)
+#'
+#' @export
 "dataset_from_peaks" = function(sample.list, metadata = NULL, description = "", type = "nmr-peaks") {
   
   merged.peaks = merge_eq_peaks_samplelist(sample.list)
   samples.df = get_all_intensities(merged.peaks)
-  create_dataset(as.matrix(samples.df), metadata = metadata, type = type, 
+  create_dataset(as.matrix(samples.df), metadata = metadata, type = type,
                  description = description)
-
+  
 }
 
 # READING
 
-# reads csv files, each with a sample; 
+# reads csv files, each with a sample;
 # filenames - list of file names of the files to read
 # returns list of data frames
-"read_multiple_csvs" = function(filenames, ext = ".csv", ...)
+#' Read multiple CSV peak files
+#'
+#' Reads multiple CSV files, one per sample, and returns them as a named list.
+#'
+#' @param filenames Character vector with file names or file paths.
+#' @param ext File extension appended to each file name.
+#' @param verbose Logical; whether progress messages should be shown.
+#' @param ... Additional arguments passed to \code{read.csv()}.
+#'
+#' @return A named list of data frames, one per input file.
+#'
+#' @examples
+#' f1 <- tempfile(fileext = ".csv")
+#' f2 <- tempfile(fileext = ".csv")
+#' utils::write.csv(data.frame(ppm = c(1, 2), int = c(10, 20)), f1, row.names = FALSE)
+#' utils::write.csv(data.frame(ppm = c(1, 3), int = c(15, 30)), f2, row.names = FALSE)
+#' read_multiple_csvs(c(f1, f2), ext = "", verbose = FALSE)
+#'
+#' @export
+"read_multiple_csvs" = function(filenames, ext = ".csv", verbose = TRUE, ...)
 {
   sampleList = list()
   sampleNames = c()
-  snames <- gsub("\\.[^.]*$", "", basename(filenames));
+  snames <- gsub("\\.[^.]*$", "", basename(filenames))
   for (i in 1:length(filenames)) {
-    print(paste("Reading sample ", filenames[i]))
+    if (verbose) message("Reading sample ", filenames[i])
     sampleList[[i]] = read.csv(paste(filenames[i], ext, sep=""), ...)
   }
   sampleNames = snames
@@ -34,10 +75,30 @@
 
 # reads list of CSV files from a given folder
 # returns list of data frames
-"read_csvs_folder" = function(foldername, ...)
+#' Read all CSV peak files in a folder
+#'
+#' Lists CSV files in a folder and reads them into a named list of data frames.
+#'
+#' @param foldername Path to the folder containing CSV files.
+#' @param verbose Logical; whether progress messages should be shown.
+#' @param ... Additional arguments passed to \code{read.csv()}.
+#'
+#' @return A named list of data frames, one per CSV file found in the folder.
+#'
+#' @examples
+#' folder <- file.path(tempdir(), "peak_csvs")
+#' dir.create(folder, showWarnings = FALSE)
+#' utils::write.csv(data.frame(ppm = c(1, 2), int = c(10, 20)),
+#'                  file.path(folder, "sample1.csv"), row.names = FALSE)
+#' utils::write.csv(data.frame(ppm = c(1, 3), int = c(15, 30)),
+#'                  file.path(folder, "sample2.csv"), row.names = FALSE)
+#' read_csvs_folder(folder, verbose = FALSE)
+#'
+#' @export
+"read_csvs_folder" = function(foldername, verbose = TRUE, ...)
 {
-  files<-dir(foldername, pattern=".[Cc][Ss][Vv]$", recursive=TRUE, full.names=TRUE)
-  sampleList = read_multiple_csvs(files, ext= "", ...);
+  files <- dir(foldername, pattern=".[Cc][Ss][Vv]$", recursive=TRUE, full.names=TRUE)
+  sampleList = read_multiple_csvs(files, ext = "", verbose = verbose, ...)
   sampleList
 }
 
@@ -64,10 +125,10 @@
   eq2 = c()
   for (i in 1:(length(sample.list)-1))
   {
-    for(j in (i+1):length(sample.list)) 
+    for(j in (i+1):length(sample.list))
     {
       res = compare::compare(sample.list[[i]], sample.list[[j]])
-      if(res$result == TRUE) 
+      if(res$result == TRUE)
       {
         eq1 = c(eq1, names(sample.list)[i])
         eq2 = c(eq2, names(sample.list)[j])
@@ -103,7 +164,7 @@
   for(i in 1:length(sample.list))
   {
     intens.vals = c()
-    for(k in 1:length(all.freqs)) 
+    for(k in 1:length(all.freqs))
     {
       intens.vals[k] = get_intensity(sample.list[[i]], all.freqs[k], tol)
     }
@@ -129,8 +190,21 @@
 }
 
 # functions working over the list of all intensities
-#' 
+#'
 #' Auto-exported function: get_peak_values
+#'
+#' @param samples.df A data frame of peak intensities with peaks in rows and samples in columns.
+#' @param peak.val Peak value identifying the row to extract.
+#'
+#' @return A numeric vector with the intensity values for the peak specified by \code{peak.val} across all samples in \code{samples.df}.
+#'
+#' @examples
+#' samples.df <- data.frame(
+#'   s1 = c(10, 20),
+#'   s2 = c(15, NA),
+#'   row.names = c("1", "2")
+#' )
+#' get_peak_values(samples.df, "1")
 #'
 #' @keywords internal
 #' @export
@@ -167,13 +241,13 @@
   d = diff(sample.df[[1]])
   indexes = which(d <= tolerance)
   if (length(indexes) != 0){
-	new.sample.df = sample.df[-(indexes+1),]
-	new.sample.df[[2]] = sum_vec(sample.df[[2]], indexes)
+    new.sample.df = sample.df[-(indexes+1),]
+    new.sample.df[[2]] = sum_vec(sample.df[[2]], indexes)
   }
   else {
-	new.sample.df = sample.df
+    new.sample.df = sample.df
   }
-
+  
   new.sample.df
 }
 
@@ -190,7 +264,7 @@
   newvec
 }
 
-# merge peaks with equal freqs (ppm) in all samples of a list 
+# merge peaks with equal freqs (ppm) in all samples of a list
 "merge_eq_peaks_samplelist" = function(sample.list, tolerance = 0.0)
 {
   newlist = list()
@@ -214,4 +288,3 @@
   colnames(resmat) = c("ppm","int","sample")
   resmat
 }
-

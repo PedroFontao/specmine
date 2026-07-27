@@ -14,8 +14,21 @@ subset_x_values_by_interval(dataset, min.value, max.value)
 \item{max.value}{Maximum x value.}
 }
 \value{
-Dataset with selected x values.
+A dataset object with the same structure as the input, where
+  `dataset$data` contains only variables whose x values fall between
+  `min.value` and `max.value`, inclusive.
 }
 \description{
 Selects x values within a numeric interval.
+}
+\examples{
+data <- matrix(
+  1:12,
+  nrow = 4,
+  dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(group = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+subset_x_values_by_interval(dataset, 15, 35)
+
 }

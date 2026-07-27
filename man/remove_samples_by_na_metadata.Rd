@@ -12,8 +12,23 @@ remove_samples_by_na_metadata(dataset, metadata.var)
 \item{metadata.var}{Metadata variable name.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where samples
+  with missing values in the selected metadata variable have been removed.
 }
 \description{
 Removes samples with NA in a given metadata variable.
+}
+\examples{
+data <- matrix(
+  1:9,
+  nrow = 3,
+  dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = c("A", NA, "B"),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+remove_samples_by_na_metadata(dataset, "class")
+
 }

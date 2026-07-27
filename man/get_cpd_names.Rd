@@ -10,11 +10,16 @@ get_cpd_names(kegg_codes)
 \item{kegg_codes}{Character vector of KEGG compound identifiers.}
 }
 \value{
-A vector or table with KEGG compound names.
+A named \code{character} vector in which the values are KEGG compound
+  identifiers and the names are the corresponding compound names. Each element
+  of the returned vector represents one KEGG compound code matched to its
+  primary compound name.
 }
 \description{
 Returns compound names associated with KEGG compound identifiers.
 }
 \examples{
-# get_cpd_names(c("C00031", "C00022"))
+\dontrun{
+get_cpd_names(c("C00031", "C00022"))
+}
 }

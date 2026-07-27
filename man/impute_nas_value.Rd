@@ -7,13 +7,25 @@
 impute_nas_value(dataset, value)
 }
 \arguments{
-\item{dataset}{Dataset to modify.}
+\item{dataset}{A dataset object to modify.}
 
-\item{value}{Replacement value.}
+\item{value}{A numeric or character value used to replace missing entries.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where all
+  missing values in `dataset$data` have been replaced by `value`. Other
+  components of the dataset are preserved unchanged.
 }
 \description{
-Impute missing values with a constant
+Replace all `NA` values in `dataset$data` by a user-defined constant.
+}
+\examples{
+data <- matrix(
+  c(1, NA, 3, 4),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2"))
+)
+dataset <- list(data = data)
+impute_nas_value(dataset, 0)
+
 }

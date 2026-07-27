@@ -4,7 +4,7 @@
 #'
 #' Performs a flat pattern filter over the dataset.
 #'
-#' @param dataset Dataset to filter.
+#' @param dataset A dataset object to filter.
 #' @param filter.function Filtering function to use. One of
 #'   `"iqr"`, `"rsd"`, `"rnsd"`, `"sd"`, `"mad"`, `"mean"`, or `"median"`.
 #' @param by.percent Logical. If `TRUE`, the number of variables to filter
@@ -17,7 +17,11 @@
 #'   If `by.threshold = TRUE`, this is the minimum value needed to keep
 #'   the variable.
 #'
-#' @return Filtered dataset.
+#' @return A dataset object with the same overall structure as the input, where
+#'   `dataset$data` has been filtered according to the selected flat-pattern
+#'   criterion. Variables failing the selection rule are removed, the remaining
+#'   dataset components are preserved, and `dataset$description` is updated to
+#'   record the filtering step.
 #'
 #' @examples
 #' if (requireNamespace("specmine.datasets", quietly = TRUE)) {

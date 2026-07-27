@@ -14,8 +14,23 @@ subset_samples_by_metadata_values(dataset, metadata.varname, values)
 \item{values}{Values to keep.}
 }
 \value{
-Dataset with selected samples.
+A dataset object with the same structure as the input, containing only
+  samples whose `metadata.varname` value matches one of the requested `values`.
 }
 \description{
 Selects a set of samples by the value of a metadata variable.
+}
+\examples{
+data <- matrix(
+  c(1, 2, 3, 4, 5, 6),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "B", "A")),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+subset_samples_by_metadata_values(dataset, "class", "A")
+
 }

@@ -11,19 +11,19 @@
 # fn.to.apply - function to apply (e.g. mean, max, min)
 # variables - allows to define which variables to calculate the stats (if numbers, indexes are assumed)
 # variable.bounds - allow to define an interval of variables (if numeric)
-# samples - if defined restricts the application to a given set of samples 
-"apply_by_variable" = function(dataset, fn.to.apply, variables = NULL, variable.bounds = NULL, 
+# samples - if defined restricts the application to a given set of samples
+"apply_by_variable" = function(dataset, fn.to.apply, variables = NULL, variable.bounds = NULL,
                                samples = NULL, ...) {
   
   if (is.null(variables)) {
     if (is.null(variable.bounds)){
       variables = rownames(dataset$data)
-    } 
+    }
     else {
       x.vars = get_x_values_as_num(dataset)
-      variables = rownames(dataset$data)[x.vars > variable.bounds[1] & x.vars < variable.bounds[2]] 
-    }  
-  }  
+      variables = rownames(dataset$data)[x.vars > variable.bounds[1] & x.vars < variable.bounds[2]]
+    }
+  }
   if (is.null(samples)) {
     samples = colnames(dataset$data)
   }
@@ -55,14 +55,22 @@
 #' @param metadata.var Metadata variable used to define the group.
 #' @param var.value Value or values of the metadata variable to select.
 #'
-#' @return Result of applying the function by variable for the selected group.
+#' @return A named vector or matrix, depending on the output of `fn.to.apply`,
+#'   containing the values obtained by applying the function to each variable
+#'   across the samples belonging to the selected group.
 #'
 #' @examples
-#' ## Example of applying a function to a group
-#' if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-#'   data(cachexia, package = "specmine.datasets")
-#'   apply.group.result = apply_by_group(cachexia, mean, "Muscle.loss", "control")
-#' }
+#' data <- matrix(
+#'   c(1, 2, 3, 4, 5, 6),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   group = c("control", "control", "case"),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' apply_by_group(dataset, mean, "group", "control")
 #'
 #' @keywords apply group
 #' @export
@@ -81,13 +89,23 @@
 #' @param variables Variables to include.
 #' @param variable.bounds Optional numeric bounds for variables.
 #'
-#' @return A table of grouped results.
+#' @return A matrix-like object with one row per selected variable and one
+#'   column per group defined by `metadata.var`. Each cell contains the result
+#'   of applying `fn.to.apply` to the values of that variable within the
+#'   corresponding group.
 #'
 #' @examples
-#' if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-#'   data(cachexia, package = "specmine.datasets")
-#'   apply.groups.result = apply_by_groups(cachexia, "Muscle.loss", mean)
-#' }
+#' data <- matrix(
+#'   c(1, 2, 3, 4, 5, 6),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   group = c("control", "control", "case"),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' apply_by_groups(dataset, "group", mean)
 #'
 #' @keywords groups apply
 #' @export
@@ -97,11 +115,11 @@
   if (is.null(variables)) {
     if (is.null(variable.bounds)){
       variables = rownames(dataset$data)
-    } 
+    }
     else {
       x.vars = get_x_values_as_num(dataset)
-      variables = rownames(dataset$data)[x.vars > variable.bounds[1] & x.vars < variable.bounds[2]] 
-    }  
+      variables = rownames(dataset$data)[x.vars > variable.bounds[1] & x.vars < variable.bounds[2]]
+    }
   }
   df = NULL
   for (v in variables) {

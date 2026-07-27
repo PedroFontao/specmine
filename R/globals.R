@@ -1,5 +1,8 @@
-#' @keywords internal
+#' @noRd
 "_PACKAGE"
+
+# R/globals.R
+utils::globalVariables(c("profmethod"))
 
 if (getRversion() >= '2.15.1') {
   utils::globalVariables(c(

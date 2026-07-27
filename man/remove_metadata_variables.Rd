@@ -12,8 +12,26 @@ remove_metadata_variables(dataset, variables.to.remove)
 \item{variables.to.remove}{Metadata variables to remove.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where the
+  selected columns have been removed from `dataset$metadata`. If no matching
+  metadata fields are found, the dataset is returned unchanged and a warning
+  is issued.
 }
 \description{
 Removes metadata variables from a dataset.
+}
+\examples{
+data <- matrix(
+  1:6,
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = c("A", "B", "A"),
+  batch = c(1, 1, 2),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+remove_metadata_variables(dataset, "batch")
+
 }

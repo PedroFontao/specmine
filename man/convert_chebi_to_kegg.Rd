@@ -6,7 +6,22 @@
 \usage{
 convert_chebi_to_kegg(chebi_codes)
 }
+\arguments{
+\item{chebi_codes}{Character vector of ChEBI identifiers.}
+}
+\value{
+A named \code{character} vector with the KEGG compound identifiers
+  corresponding to the input ChEBI codes. The vector values are KEGG compound
+  codes prefixed with \code{"cpd:"}, and the element names are the matched
+  compound names.
+}
 \description{
 Auto-exported function: convert_chebi_to_kegg
+}
+\examples{
+\dontrun{
+convert_chebi_to_kegg(c("CHEBI:15377"))
+}
+
 }
 \keyword{internal}

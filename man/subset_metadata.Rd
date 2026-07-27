@@ -12,8 +12,24 @@ subset_metadata(dataset, variables)
 \item{variables}{Metadata variables to keep.}
 }
 \value{
-Dataset with selected metadata variables.
+A dataset object with the same structure as the input, where
+  `dataset$metadata` contains only the selected metadata variables.
 }
 \description{
 Selects metadata variables to keep.
+}
+\examples{
+data <- matrix(
+  1:6,
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = c("A", "B", "A"),
+  batch = c(1, 1, 2),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+subset_metadata(dataset, "class")
+
 }

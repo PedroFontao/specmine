@@ -2,7 +2,7 @@
 % Please edit documentation in R/reading_data.R
 \name{read_data_csv}
 \alias{read_data_csv}
-\title{Auto-exported function: read_data_csv}
+\title{Reads a data matrix from a CSV file}
 \usage{
 read_data_csv(
   filename,
@@ -12,7 +12,40 @@ read_data_csv(
   sep = ","
 )
 }
+\arguments{
+\item{filename}{Path to the CSV file containing the data matrix.}
+
+\item{format}{Data layout format, either \code{"row"} or \code{"col"}.
+If \code{"row"}, samples are assumed to be stored in rows and the matrix
+is transposed so that samples become columns in the returned matrix.
+If \code{"col"}, the matrix is kept as read.}
+
+\item{header.col}{Logical; whether the file has a header row.}
+
+\item{header.row}{Logical; whether the file has a row names column.}
+
+\item{sep}{Field separator used in the file.}
+}
+\value{
+A numeric matrix containing the imported data in the package's
+  internal orientation, with variables in rows and samples in columns.
+  If \code{format = "row"}, the input table is transposed before being
+  returned. The function stops with an error if non-numeric values are found
+  in the data table.
+}
 \description{
-Auto-exported function: read_data_csv
+Imports a numeric data table from a CSV file and converts it to the internal
+matrix structure used by the package.
+}
+\examples{
+data_file <- tempfile(fileext = ".csv")
+data_in <- data.frame(
+  x1 = c(1.1, 2.2, 3.3),
+  x2 = c(4.4, 5.5, 6.6),
+  row.names = c("s1", "s2", "s3")
+)
+utils::write.csv(data_in, data_file)
+read_data_csv(data_file, format = "row", header.row = TRUE)
+
 }
 \keyword{internal}

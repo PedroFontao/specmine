@@ -2,8 +2,6 @@
 ################################ ICA #######################################
 ############################################################################
 
-
-
 # perform ICA analysis
 # n_components  - number of independent components to extract (default: 2)
 # alg.typ       - algorithm type: "parallel" or "deflation" (default: "parallel")
@@ -15,8 +13,7 @@
 # write.file    - if TRUE, saves the components to a CSV file
 # file.out      - base name for output file
 
-
-ica_analysis_dataset = function(dataset, n_components = 2, alg.typ = "parallel", fun = "logcosh", maxit = 200, tol = 1e-4, scale = FALSE, seed = 42, write.file = FALSE, file.out = "ica", ...) {
+ica_analysis_dataset = function(dataset, n_components = 2, alg.typ = "parallel", fun = "logcosh", maxit = 200, tol = 1e-4, scale = FALSE, seed = 42, write.file = FALSE, file.out = NULL, ...) {
   if (!requireNamespace("fastICA", quietly = TRUE)) stop("Package 'fastICA' is required. Install it with: install.packages('fastICA')")
   mat_check = as.matrix(dataset$data)
   if (any(is.na(mat_check)) || any(is.nan(mat_check)) || any(is.infinite(mat_check))) {
@@ -35,7 +32,12 @@ ica_analysis_dataset = function(dataset, n_components = 2, alg.typ = "parallel",
   embedding = ica_model$S
   rownames(embedding) = colnames(dataset$data)
   colnames(embedding) = paste0("IC", seq_len(n_components))
-  if (write.file) write.csv(embedding, file = paste0(file.out, "_components.csv"))
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(embedding, file = paste0(file.out, "_components.csv"))
+  }
   result = list(
     embedding  = embedding,
     S          = ica_model$S,
@@ -48,23 +50,7 @@ ica_analysis_dataset = function(dataset, n_components = 2, alg.typ = "parallel",
   return(result)
 }
 
-
-
 ########################## ICA PLOTS ##################################
-
-
-
-# 2d scores plot
-# column.class - name of metadata column to colour points by
-# dims         - which IC dimensions to plot (default: c(1,2))
-# labels       - if TRUE, shows sample names next to points
-# ellipses     - if TRUE, draws confidence ellipses per group
-# bw           - if TRUE, uses black and white with shapes instead of colours
-# palette      - colour palette index for scale_colour_brewer
-# leg.pos      - legend position ("right", "left", "top", "bottom")
-# xlim         - optional x axis limits c(min, max)
-# ylim         - optional y axis limits c(min, max)
-
 
 ica_scoresplot2D = function(dataset, ica.result, column.class = NULL, dims = c(1,2), labels = FALSE, ellipses = FALSE, bw = FALSE, palette = 2, leg.pos = "right", xlim = NULL, ylim = NULL) {
   has.legend = FALSE
@@ -100,14 +86,6 @@ ica_scoresplot2D = function(dataset, ica.result, column.class = NULL, dims = c(1
   ica.plot
 }
 
-
-
-# 3d scores plot (uses plotly)
-# column.class - name of metadata column to colour points by
-# dims         - which IC dimensions to plot (default: c(1,2,3))
-# title        - plot title
-
-
 ica_scoresplot3D = function(dataset, ica.result, column.class = NULL, dims = c(1,2,3), title = "ICA 3D Scores Plot") {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   emb = ica.result$embedding
@@ -124,13 +102,6 @@ ica_scoresplot3D = function(dataset, ica.result, column.class = NULL, dims = c(1
     plotly::layout(title = title)
 }
 
-
-
-# pairs plot for multiple IC components
-# column.class - name of metadata column to colour points by
-# dims         - which IC dimensions to include (default: first 5)
-
-
 ica_pairs_plot = function(dataset, ica.result, column.class = NULL, dims = 1:min(5, ncol(ica.result$embedding)), ...) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")
   emb = ica.result$embedding
@@ -144,14 +115,6 @@ ica_pairs_plot = function(dataset, ica.result, column.class = NULL, dims = 1:min
   pairs.df$group = group.values
   GGally::ggpairs(pairs.df, mapping = ggplot2::aes(color = group), ...)
 }
-
-
-
-# loadings plot: variable contributions to each IC
-# dims         - which ICs to plot loadings for (default: c(1,2))
-# top.n        - if set, shows only the top N variables by absolute loading
-# labels       - if TRUE, shows variable names (use only with few variables or top.n)
-
 
 ica_loadingsplot = function(ica.result, dims = c(1,2), top.n = NULL, labels = FALSE) {
   loadings.mat = ica.result$loadings
@@ -177,21 +140,6 @@ ica_loadingsplot = function(ica.result, dims = c(1,2), top.n = NULL, labels = FA
   if (labels) p = p + ggplot2::geom_text(ggplot2::aes(label = .data[["variable"]]), hjust = -0.1, vjust = 0, size = 3)
   p
 }
-
-
-
-# kmeans clustering with 2 IC dimensions
-# num.clusters  - number of k-means clusters
-# dims          - which IC dimensions to plot (default: c(1,2))
-# kmeans.result - optional pre-computed clustering result (from clustering())
-# use.embedding - if TRUE, runs k-means on the IC embedding instead of raw data
-# labels        - if TRUE, shows sample names next to points
-# bw            - if TRUE, uses black and white with shapes instead of colours
-# ellipses      - if TRUE, draws confidence ellipses per group
-# leg.pos       - legend position
-# xlim          - optional x axis limits c(min, max)
-# ylim          - optional y axis limits c(min, max)
-
 
 ica_kmeans_plot2D = function(dataset, ica.result, num.clusters = 3, dims = c(1,2), kmeans.result = NULL, use.embedding = TRUE, labels = FALSE, bw = FALSE, ellipses = FALSE, leg.pos = "right", xlim = NULL, ylim = NULL) {
   emb = ica.result$embedding
@@ -226,16 +174,6 @@ ica_kmeans_plot2D = function(dataset, ica.result, num.clusters = 3, dims = c(1,2
   ica.plot
 }
 
-
-
-# kmeans clustering with 3 IC dimensions (uses plotly)
-# num.clusters  - number of k-means clusters
-# dims          - which IC dimensions to plot (default: c(1,2,3))
-# kmeans.result - optional pre-computed clustering result (from clustering())
-# use.embedding - if TRUE, runs k-means on the IC embedding instead of raw data
-# title         - plot title
-
-
 ica_kmeans_plot3D = function(dataset, ica.result, num.clusters = 3, dims = c(1,2,3), kmeans.result = NULL, use.embedding = TRUE, title = "ICA 3D K-means Plot") {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   emb = ica.result$embedding
@@ -254,15 +192,6 @@ ica_kmeans_plot3D = function(dataset, ica.result, num.clusters = 3, dims = c(1,2
   plotly::plot_ly(df, x = ~IC1, y = ~IC2, z = ~IC3, color = ~Group, type = "scatter3d", mode = "markers") %>%
     plotly::layout(title = title)
 }
-
-
-
-# pairs plot with kmeans clusters
-# num.clusters  - number of k-means clusters
-# dims          - which IC dimensions to include (default: first 5)
-# kmeans.result - optional pre-computed clustering result (from clustering())
-# use.embedding - if TRUE, runs k-means on the IC embedding instead of raw data
-
 
 ica_pairs_kmeans_plot = function(dataset, ica.result, num.clusters = 3, kmeans.result = NULL, use.embedding = TRUE, dims = 1:min(5, ncol(ica.result$embedding))) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")

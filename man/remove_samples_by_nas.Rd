@@ -14,8 +14,23 @@ remove_samples_by_nas(dataset, max.nas = 0, by.percent = FALSE)
 \item{by.percent}{Logical. If TRUE, max.nas is treated as a percentage.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where samples
+  whose number of missing values exceeds `max.nas` have been removed from both
+  `dataset$data` and `dataset$metadata`.
 }
 \description{
 Removes samples with too many missing values.
+}
+\examples{
+data <- matrix(
+  c(1, NA, 3,
+    4,  5, NA,
+    7,  8, 9),
+  nrow = 3,
+  dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+remove_samples_by_nas(dataset, max.nas = 0)
+
 }

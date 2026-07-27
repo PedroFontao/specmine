@@ -7,8 +7,19 @@
 convert_hmdb_to_kegg(hmdb_codes)
 }
 \arguments{
-\item{hmdb_codes}{TODO.}
+\item{hmdb_codes}{Character vector of HMDB identifiers.}
+}
+\value{
+A named \code{character} vector with the KEGG compound identifiers
+  corresponding to the input HMDB codes. The vector values are KEGG compound
+  codes prefixed with \code{"cpd:"}, and the element names are the matched
+  compound names.
 }
 \description{
 Get kegg codes from hmdb codes:
+}
+\examples{
+\dontrun{
+convert_hmdb_to_kegg(c("HMDB0000122"))
+}
 }

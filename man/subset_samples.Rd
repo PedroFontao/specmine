@@ -14,8 +14,24 @@ subset_samples(dataset, samples, rebuild.factors = TRUE)
 \item{rebuild.factors}{If TRUE, rebuild factors in metadata.}
 }
 \value{
-Dataset with selected samples.
+A dataset object with the same overall structure as the input, containing
+  only the selected samples in both `dataset$data` and `dataset$metadata`. If
+  `rebuild.factors` is `TRUE`, unused factor levels in metadata are dropped.
 }
 \description{
 Returns a dataset with a selected set of samples.
+}
+\examples{
+data <- matrix(
+  c(1, 2, 3, 4, 5, 6),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "B", "A")),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+subset_samples(dataset, c("s1", "s3"))
+
 }

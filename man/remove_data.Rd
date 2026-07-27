@@ -24,8 +24,21 @@ remove_data(
 \item{rebuild.factors}{Logical. If TRUE, rebuild factors in metadata.}
 }
 \value{
-Modified dataset.
+A dataset object with the same overall structure as the input, where
+  the requested samples, data variables, or metadata variables have been
+  removed according to `type`.
 }
 \description{
 Removes selected samples, data variables, or metadata variables from a dataset.
+}
+\examples{
+data <- matrix(
+  1:9,
+  nrow = 3,
+  dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+remove_data(dataset, "s2", type = "sample")
+
 }

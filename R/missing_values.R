@@ -1,21 +1,25 @@
-# R/missing_values.R
-
 #' Missing values imputation
 #'
 #' Impute missing values in a dataset using different methods.
 #'
-#' @param dataset Dataset to inspect.
-#' @param method Imputation method: "value", "mean", "median", "knn", or "linapprox".
-#' @param value If method = "value", the value that will replace NAs.
-#' @param k If method = "knn", the number of neighbors.
+#' @param dataset A dataset object to process.
+#' @param method Imputation method: `"value"`, `"mean"`, `"median"`, `"knn"`, or `"linapprox"`.
+#' @param value If `method = "value"`, the value used to replace missing entries.
+#' @param k If `method = "knn"`, the number of neighbors used for imputation.
 #'
-#' @return Dataset with imputed missing values.
+#' @return A dataset object with the same overall structure as the input, in which
+#'   missing values in `dataset$data` have been imputed according to the selected
+#'   method. The returned object preserves the dataset components and updates the
+#'   description to record the imputation step.
 #'
 #' @examples
-#' if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-#'   data(propolis, package = "specmine.datasets")
-#'   propolis_proc = missingvalues_imputation(propolis, method = "value", value = 0.0005)
-#' }
+#' data <- matrix(
+#'   c(1, NA, 3, 4, 5, NA),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' dataset <- list(data = data, description = "toy dataset")
+#' missingvalues_imputation(dataset, method = "value", value = 0)
 #'
 #' @export
 "missingvalues_imputation" = function(dataset, method = "value", value = 0.0005, k = 5){
@@ -46,10 +50,23 @@ impute_nas_linapprox <- function(dataset){
 
 #' Impute missing values with a constant
 #'
-#' @param dataset Dataset to modify.
-#' @param value Replacement value.
+#' Replace all `NA` values in `dataset$data` by a user-defined constant.
 #'
-#' @return Modified dataset.
+#' @param dataset A dataset object to modify.
+#' @param value A numeric or character value used to replace missing entries.
+#'
+#' @return A dataset object with the same structure as the input, where all
+#'   missing values in `dataset$data` have been replaced by `value`. Other
+#'   components of the dataset are preserved unchanged.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 3, 4),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2"))
+#' )
+#' dataset <- list(data = data)
+#' impute_nas_value(dataset, 0)
 #'
 #' @export
 "impute_nas_value" = function(dataset, value)
@@ -60,17 +77,31 @@ impute_nas_linapprox <- function(dataset){
 
 #' Impute missing values with mean
 #'
-#' @param dataset Dataset to modify.
+#' Replace missing values in each variable by the mean of the observed values
+#' for that variable.
 #'
-#' @return Modified dataset.
+#' @param dataset A dataset object to modify.
+#'
+#' @return A dataset object with the same structure as the input, where missing
+#'   values in `dataset$data` have been replaced by the mean of the corresponding
+#'   variable calculated with `na.rm = TRUE`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 3, 4),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2"))
+#' )
+#' dataset <- list(data = data)
+#' impute_nas_mean(dataset)
 #'
 #' @export
 "impute_nas_mean" = function(dataset){
   temp = apply(dataset$data, 1, function(x){
     if(sum(is.na(x))>0){
-      x[is.na(x)] = mean(x, na.rm=TRUE);
+      x[is.na(x)] = mean(x, na.rm=TRUE)
     }
-    x;
+    x
   })
   dataset$data = t(temp)
   dataset
@@ -78,17 +109,31 @@ impute_nas_linapprox <- function(dataset){
 
 #' Impute missing values with median
 #'
-#' @param dataset Dataset to modify.
+#' Replace missing values in each variable by the median of the observed values
+#' for that variable.
 #'
-#' @return Modified dataset.
+#' @param dataset A dataset object to modify.
+#'
+#' @return A dataset object with the same structure as the input, where missing
+#'   values in `dataset$data` have been replaced by the median of the corresponding
+#'   variable calculated with `na.rm = TRUE`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 5, 4),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2"))
+#' )
+#' dataset <- list(data = data)
+#' impute_nas_median(dataset)
 #'
 #' @export
 "impute_nas_median" = function(dataset) {
   temp = apply(dataset$data, 1, function(x){
     if(sum(is.na(x))>0){
-      x[is.na(x)] = median(x,na.rm=TRUE);
+      x[is.na(x)] = median(x, na.rm=TRUE)
     }
-    x;
+    x
   })
   dataset$data = t(temp)
   dataset
@@ -96,14 +141,34 @@ impute_nas_linapprox <- function(dataset){
 
 #' Impute missing values with kNN
 #'
-#' @param dataset Dataset to modify.
-#' @param k Number of neighbors.
+#' Replace missing values using k-nearest neighbors imputation.
+#'
+#' @param dataset A dataset object to modify.
+#' @param k Number of neighbors to use in the imputation procedure.
 #' @param ... Additional arguments passed to `impute::impute.knn()`.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where missing
+#'   values in `dataset$data` have been imputed using the k-nearest neighbors
+#'   method implemented in `impute::impute.knn()`. The returned object preserves
+#'   the remaining dataset components unchanged.
+#'
+#' @examples
+#' \donttest{
+#' data <- matrix(
+#'   c(1,  2, NA, 4,
+#'     2,  3,  4, 5,
+#'     3, NA,  5, 6,
+#'     4,  5,  6, 7),
+#'   nrow = 4,
+#'   byrow = TRUE,
+#'   dimnames = list(c("x1", "x2", "x3", "x4"), c("s1", "s2", "s3", "s4"))
+#' )
+#' dataset <- list(data = data)
+#' impute_nas_knn(dataset, k = 2)
+#' }
 #'
 #' @export
 "impute_nas_knn" = function(dataset, k = 10, ...){
-  dataset$data = impute::impute.knn(dataset$data, ...)$data
+  dataset$data = impute::impute.knn(dataset$data, k = k, ...)$data
   dataset
 }

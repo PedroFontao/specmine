@@ -21,3 +21,19 @@ A list with p-value, -log10(p), FDR, and optional Tukey results.
 \description{
 Performs one-way ANOVA for a single variable in a dataset.
 }
+\examples{
+datamatrix <- matrix(
+  c(10, 11, 20, 21,
+    5,  6,  5,  6),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3", "s4"))
+)
+metadata <- data.frame(
+  group = factor(c("A", "A", "B", "B")),
+  row.names = c("s1", "s2", "s3", "s4")
+)
+dataset <- list(data = datamatrix, metadata = metadata)
+aov_one_var(dataset, "x1", metadata$group, doTukey = FALSE)
+
+}

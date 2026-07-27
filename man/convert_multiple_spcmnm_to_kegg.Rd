@@ -7,8 +7,20 @@
 convert_multiple_spcmnm_to_kegg(spcmnm_codes)
 }
 \arguments{
-\item{spcmnm_codes}{TODO.}
+\item{spcmnm_codes}{Character vector of SPCMNM identifiers.}
+}
+\value{
+A named \code{character} vector with the KEGG compound identifiers
+  corresponding to the input SPCMNM codes. The vector values are KEGG compound
+  codes prefixed with \code{"cpd:"}, and the element names are the matched
+  compound names.
 }
 \description{
 Get kegg codes from spcmnm codes:
+}
+\examples{
+\dontrun{
+convert_multiple_spcmnm_to_kegg(c("SPCM00001"))
+}
+
 }

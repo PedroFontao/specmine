@@ -12,8 +12,22 @@ count_missing_values_per_variable(dataset, remove.zero = TRUE)
 \item{remove.zero}{If TRUE, removes zero counts.}
 }
 \value{
-Vector of missing values counts.
+A named numeric vector giving the number of missing values for each
+  variable in `dataset$data`. If `remove.zero` is `TRUE`, only variables with
+  at least one missing value are returned.
 }
 \description{
 Returns the number of missing values per variable.
+}
+\examples{
+data <- matrix(
+  c(1, 2, NA,
+    4, 5, NA),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+count_missing_values_per_variable(dataset)
+
 }

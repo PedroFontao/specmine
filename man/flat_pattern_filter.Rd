@@ -13,7 +13,7 @@ flat_pattern_filter(
 )
 }
 \arguments{
-\item{dataset}{Dataset to filter.}
+\item{dataset}{A dataset object to filter.}
 
 \item{filter.function}{Filtering function to use. One of
 `"iqr"`, `"rsd"`, `"rnsd"`, `"sd"`, `"mad"`, `"mean"`, or `"median"`.}
@@ -31,7 +31,11 @@ If `by.threshold = TRUE`, this is the minimum value needed to keep
 the variable.}
 }
 \value{
-Filtered dataset.
+A dataset object with the same overall structure as the input, where
+  `dataset$data` has been filtered according to the selected flat-pattern
+  criterion. Variables failing the selection rule are removed, the remaining
+  dataset components are preserved, and `dataset$description` is updated to
+  record the filtering step.
 }
 \description{
 Performs a flat pattern filter over the dataset.

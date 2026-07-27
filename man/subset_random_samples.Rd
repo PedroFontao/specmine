@@ -12,8 +12,24 @@ subset_random_samples(dataset, nsamples)
 \item{nsamples}{Number of samples to select.}
 }
 \value{
-Dataset with selected random samples.
+A dataset object with the same structure as the input, containing a
+  random subset of `nsamples` samples.
 }
 \description{
 Selects a random subset of samples from the dataset.
+}
+\examples{
+set.seed(123)
+data <- matrix(
+  1:12,
+  nrow = 3,
+  dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3", "s4"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "A", "B", "B")),
+  row.names = c("s1", "s2", "s3", "s4")
+)
+dataset <- list(data = data, metadata = metadata)
+subset_random_samples(dataset, 2)
+
 }

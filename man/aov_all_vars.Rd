@@ -9,7 +9,7 @@ aov_all_vars(
   column.class,
   doTukey = TRUE,
   write.file = FALSE,
-  file.out = "anova-res.csv"
+  file.out = NULL
 )
 }
 \arguments{
@@ -30,13 +30,19 @@ A data frame with ANOVA results for all variables.
 Performs one-way ANOVA for all variables in a dataset.
 }
 \examples{
-## Example of ANOVA with TukeyHSD
-if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-  data(propolis, package = "specmine.datasets")
-  propolis_proc = missingvalues_imputation(propolis)
-  propolis_proc = flat_pattern_filter(propolis_proc, "iqr", by.percent = TRUE, red.value = 75)
-  result = aov_all_vars(propolis_proc, "seasons", doTukey = FALSE)
-}
+datamatrix <- matrix(
+  c(10, 11, 20, 21,
+    5,  6,  5,  6),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3", "s4"))
+)
+metadata <- data.frame(
+  group = factor(c("A", "A", "B", "B")),
+  row.names = c("s1", "s2", "s3", "s4")
+)
+dataset <- list(data = datamatrix, metadata = metadata)
+aov_all_vars(dataset, "group", doTukey = FALSE)
 
 }
 \keyword{anova}

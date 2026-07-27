@@ -9,11 +9,40 @@ pca_analysis_dataset(
   scale = TRUE,
   center = TRUE,
   write.file = FALSE,
-  file.out = "pca",
+  file.out = NULL,
   ...
 )
 }
+\arguments{
+\item{dataset}{Dataset to analyse.}
+
+\item{scale}{Logical indicating whether variables should be scaled.}
+
+\item{center}{Logical indicating whether variables should be centered.}
+
+\item{write.file}{Logical indicating whether scores and loadings should be written to files.}
+
+\item{file.out}{Output file prefix used when \code{write.file = TRUE}.}
+
+\item{...}{Additional arguments passed to \code{prcomp()}.}
+}
+\value{
+An object of class \code{prcomp} containing PCA results. The
+  \code{x} component stores sample scores and the \code{rotation} component
+  stores variable loadings.
+}
 \description{
 Auto-exported function: pca_analysis_dataset
+}
+\examples{
+datamat <- matrix(
+  rnorm(20),
+  nrow = 4,
+  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+)
+metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
+dataset <- list(data = datamat, metadata = metadata)
+pca_res <- pca_analysis_dataset(dataset)
+
 }
 \keyword{internal}

@@ -6,7 +6,22 @@
 \usage{
 get_samples_names_dx(foldername)
 }
+\arguments{
+\item{foldername}{Path to the folder containing JDX files.}
+}
+\value{
+A \code{character} vector with the sample names extracted from the JDX files in the input folder.
+}
 \description{
-Auto-exported function: get_samples_names_dx
+Extract sample names from JDX files in a folder.
+}
+\examples{
+\dontshow{.old_wd <- setwd(tempdir())}
+dir.create("jdx_examples", showWarnings = FALSE)
+file.create(file.path("jdx_examples", "sample1.dx"))
+file.create(file.path("jdx_examples", "sample2.DX"))
+get_samples_names_dx("jdx_examples")
+\dontshow{setwd(.old_wd)}
+
 }
 \keyword{internal}

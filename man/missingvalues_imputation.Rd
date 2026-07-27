@@ -7,24 +7,30 @@
 missingvalues_imputation(dataset, method = "value", value = 5e-04, k = 5)
 }
 \arguments{
-\item{dataset}{Dataset to inspect.}
+\item{dataset}{A dataset object to process.}
 
-\item{method}{Imputation method: "value", "mean", "median", "knn", or "linapprox".}
+\item{method}{Imputation method: `"value"`, `"mean"`, `"median"`, `"knn"`, or `"linapprox"`.}
 
-\item{value}{If method = "value", the value that will replace NAs.}
+\item{value}{If `method = "value"`, the value used to replace missing entries.}
 
-\item{k}{If method = "knn", the number of neighbors.}
+\item{k}{If `method = "knn"`, the number of neighbors used for imputation.}
 }
 \value{
-Dataset with imputed missing values.
+A dataset object with the same overall structure as the input, in which
+  missing values in `dataset$data` have been imputed according to the selected
+  method. The returned object preserves the dataset components and updates the
+  description to record the imputation step.
 }
 \description{
 Impute missing values in a dataset using different methods.
 }
 \examples{
-if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-  data(propolis, package = "specmine.datasets")
-  propolis_proc = missingvalues_imputation(propolis, method = "value", value = 0.0005)
-}
+data <- matrix(
+  c(1, NA, 3, 4, 5, NA),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+dataset <- list(data = data, description = "toy dataset")
+missingvalues_imputation(dataset, method = "value", value = 0)
 
 }

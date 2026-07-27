@@ -13,6 +13,20 @@ get_paths_with_cpds_org(organism_code, compounds, full.result = TRUE)
 
 \item{full.result}{TODO.}
 }
+\value{
+A \code{data.frame} with the pathways containing the input compounds.
+  Each row represents one matched pathway. When \code{full.result = TRUE}, the
+  returned data frame includes the columns \code{pathways}, \code{ratio},
+  \code{compounds}, and \code{compounds_names}; otherwise it contains only
+  \code{pathways} and \code{ratio}. Row names correspond to pathway names.
+}
 \description{
 Get only the paths of the organism that contain given compounds:
+}
+\examples{
+\dontrun{
+cpds <- c(glucose = "cpd:C00031", pyruvate = "cpd:C00022")
+head(get_paths_with_cpds_org("hsa", cpds, full.result = FALSE))
+}
+
 }

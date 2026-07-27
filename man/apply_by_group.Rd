@@ -16,17 +16,25 @@ apply_by_group(dataset, fn.to.apply, metadata.var, var.value)
 \item{var.value}{Value or values of the metadata variable to select.}
 }
 \value{
-Result of applying the function by variable for the selected group.
+A named vector or matrix, depending on the output of `fn.to.apply`,
+  containing the values obtained by applying the function to each variable
+  across the samples belonging to the selected group.
 }
 \description{
 Applies a function to the variables of samples belonging to a given group.
 }
 \examples{
-## Example of applying a function to a group
-if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-  data(cachexia, package = "specmine.datasets")
-  apply.group.result = apply_by_group(cachexia, mean, "Muscle.loss", "control")
-}
+data <- matrix(
+  c(1, 2, 3, 4, 5, 6),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  group = c("control", "control", "case"),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+apply_by_group(dataset, mean, "group", "control")
 
 }
 \keyword{apply}

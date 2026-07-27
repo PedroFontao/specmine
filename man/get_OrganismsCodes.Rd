@@ -6,6 +6,18 @@
 \usage{
 get_OrganismsCodes()
 }
+\value{
+A \code{data.frame} with the KEGG T number, organism code, species
+  names, and phylogeny for all organisms available in KEGG. Each row
+  represents one organism and the columns are \code{Tnumber},
+  \code{organismCode}, \code{speciesNames}, and \code{phylogeny}.
+}
 \description{
 Get code, t number, full name and phylogeny of all organisms in KEGG:
+}
+\examples{
+\dontrun{
+head(get_OrganismsCodes())
+}
+
 }

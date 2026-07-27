@@ -18,7 +18,7 @@
   m
 }
 
-linreg_coef_table = function(linreg.results, write.file = FALSE, file.out = "linreg-coefs.csv"){
+linreg_coef_table = function(linreg.results, write.file = FALSE, file.out = NULL){
   num_vars = dim(linreg.results[[1]]$coefficients)[1]
   m = matrix(NA, length(linreg.results), num_vars)
   rownames(m) = names(linreg.results)
@@ -27,11 +27,16 @@ linreg_coef_table = function(linreg.results, write.file = FALSE, file.out = "lin
   }
   coef.table = as.data.frame(m)
   colnames(coef.table) = trimws(rownames(linreg.results[[1]]$coefficients))
-  if (write.file) write.csv(coef.table, file = file.out)
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(coef.table, file = file.out)
+  }
   coef.table  
 }
 
-linreg_pvalue_table = function(linreg.results, write.file = FALSE, file.out = "linreg-pvalues.csv"){
+linreg_pvalue_table = function(linreg.results, write.file = FALSE, file.out = NULL){
   num_vars = dim(linreg.results[[1]]$coefficients)[1]
   m = matrix(NA, length(linreg.results), num_vars)
   rownames(m) = names(linreg.results)
@@ -40,11 +45,16 @@ linreg_pvalue_table = function(linreg.results, write.file = FALSE, file.out = "l
   }
   pv.table = as.data.frame(m)
   colnames(pv.table) = trimws(rownames(linreg.results[[1]]$coefficients))
-  if (write.file) write.csv(pv.table, file = file.out)
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(pv.table, file = file.out)
+  }
   pv.table  
 }
 
-linreg_rsquared = function(linreg.results, write.file = FALSE, file.out = "linreg-rsquared.csv"){
+linreg_rsquared = function(linreg.results, write.file = FALSE, file.out = NULL){
   m = matrix(NA, length(linreg.results), 2)
   rownames(m) = names(linreg.results)
   for (i in 1:length(linreg.results)){
@@ -53,35 +63,40 @@ linreg_rsquared = function(linreg.results, write.file = FALSE, file.out = "linre
   }
   rsq.table = as.data.frame(m)
   colnames(rsq.table) = c("r.squared", "adj.r.squared")
-  if (write.file) write.csv(rsq.table, file = file.out)
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(rsq.table, file = file.out)
+  }
   rsq.table  
 }
 
 plot_regression_coefs_pvalues = function(linreg.results, bar.col = NULL, coef.size = 5, ...){
-	coefs = linreg_coef_table(linreg.results)
-	pvalues = linreg_pvalue_table(linreg.results)
-	df.coefs = data.frame(t(coefs))
-	df.coefs = data.frame(round(df.coefs,2))
-	df.pvalues = data.frame(t(pvalues))
-	df.pvalues = data.frame(-log10(df.pvalues))
-	df.pvalues.coefs = data.frame(cbind(df.pvalues, df.coefs))
-	num.variables = length(rownames(pvalues))
-	colnames(df.pvalues.coefs) = paste("X",1:(num.variables*2), sep="")
-	df.pvalues.coefs$names = colnames(pvalues)
-	plots = list()
-	if (is.null(bar.col)){
-		bar.col = rep("steelblue", num.variables)
-	}
-	
-	for (count in 1:num.variables){
-			p = ggplot2::ggplot(data = df.pvalues.coefs, ggplot2::aes_string(x="names", y=paste("X",count,sep="") )) + 
-            ggplot2::geom_bar(stat="identity", position = ggplot2::position_dodge(), fill = bar.col[count], ...) + 
-            ggplot2::geom_text(ggplot2::aes_string(label=paste("X",count+num.variables,sep="")), vjust=-0.3, size=coef.size, ...) + 
-            ggplot2::ylab("-log10(pvalue)") + ggplot2::xlab(rownames(pvalues)[count])
-		plots[[count]] = p
-	}
-	
-	num.cols = num.variables %/% 2
-	
-	multiplot(plots, cols = num.cols)
+  coefs = linreg_coef_table(linreg.results)
+  pvalues = linreg_pvalue_table(linreg.results)
+  df.coefs = data.frame(t(coefs))
+  df.coefs = data.frame(round(df.coefs,2))
+  df.pvalues = data.frame(t(pvalues))
+  df.pvalues = data.frame(-log10(df.pvalues))
+  df.pvalues.coefs = data.frame(cbind(df.pvalues, df.coefs))
+  num.variables = length(rownames(pvalues))
+  colnames(df.pvalues.coefs) = paste("X",1:(num.variables*2), sep="")
+  df.pvalues.coefs$names = colnames(pvalues)
+  plots = list()
+  if (is.null(bar.col)){
+    bar.col = rep("steelblue", num.variables)
+  }
+  
+  for (count in 1:num.variables){
+    p = ggplot2::ggplot(data = df.pvalues.coefs, ggplot2::aes_string(x="names", y=paste("X",count,sep="") )) + 
+      ggplot2::geom_bar(stat="identity", position = ggplot2::position_dodge(), fill = bar.col[count], ...) + 
+      ggplot2::geom_text(ggplot2::aes_string(label=paste("X",count+num.variables,sep="")), vjust=-0.3, size=coef.size, ...) + 
+      ggplot2::ylab("-log10(pvalue)") + ggplot2::xlab(rownames(pvalues)[count])
+    plots[[count]] = p
+  }
+  
+  num.cols = num.variables %/% 2
+  
+  multiplot(plots, cols = num.cols)
 }

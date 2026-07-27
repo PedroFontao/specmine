@@ -9,6 +9,19 @@ convert_keggpathway_2_reactiongraph(pathObj)
 \arguments{
 \item{pathObj}{TODO.}
 }
+\value{
+A graph object representing the reactions in the input
+  \code{KEGGPathway} object. The returned object is suitable for graph-based
+  inspection or for use in downstream visualization functions.
+}
 \description{
 Convert KEGGPathway object to graph object
+}
+\examples{
+\dontrun{
+path <- get_MetabolitePath("hsa00010")
+graph <- convert_keggpathway_2_reactiongraph(path)
+class(graph)
+}
+
 }

@@ -17,11 +17,9 @@ create_dataset(
 )
 }
 \arguments{
-\item{datamatrix}{Matrix with numerical data; rows are assumed to be
-variables and columns are assumed to be samples.}
+\item{datamatrix}{Matrix with numerical data; rows are variables and columns are samples.}
 
-\item{type}{Type of data, such as `"nmr-spectra"`, `"nmr-peaks"`,
-`"ir-spectra"`, `"uvv-spectra"`, `"concentrations"`, or `"undefined"`.}
+\item{type}{Type of data, such as "nmr-spectra", "nmr-peaks", "ir-spectra", "uvv-spectra", "concentrations", or "undefined".}
 
 \item{metadata}{Optional metadata as a data frame or matrix.}
 
@@ -33,13 +31,39 @@ variables and columns are assumed to be samples.}
 
 \item{label.x}{Optional x-axis label.}
 
-\item{label.values}{Optional values label.}
+\item{label.values}{Optional value label.}
 
 \item{xSet}{Optional xSet object.}
 }
 \value{
-A dataset object as a list.
+A list representing a specmine dataset. The returned object contains at least the elements
+  \code{data}, a numeric matrix with variables in rows and samples in columns; \code{type}, a character
+  string identifying the dataset type; \code{description}, a character string describing the dataset;
+  \code{metadata}, a data frame with one row per sample when available; \code{labels}, a list with axis
+  and value labels when provided; and \code{xSet}, an optional object associated with LC-MS processing.
+  This object is the standard input structure used by downstream specmine analysis functions.
 }
 \description{
-Creates a dataset from existing objects.
+Creates a dataset from a numeric matrix.
+}
+\examples{
+datamatrix <- matrix(
+  c(1.1, 2.2, 3.3, 4.4, 5.5, 6.6),
+  nrow = 2,
+  dimnames = list(NULL, NULL)
+)
+metadata <- data.frame(
+  class = c("A", "B", "A"),
+  row.names = c("s1", "s2", "s3")
+)
+create_dataset(
+  datamatrix,
+  type = "concentrations",
+  metadata = metadata,
+  sample.names = c("s1", "s2", "s3"),
+  x.axis.values = c("v1", "v2"),
+  label.x = "variable",
+  label.values = "intensity"
+)
+
 }

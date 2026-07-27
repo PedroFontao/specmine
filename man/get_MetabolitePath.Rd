@@ -9,6 +9,19 @@ get_MetabolitePath(pathcode)
 \arguments{
 \item{pathcode}{TODO.}
 }
+\value{
+A \code{KEGGPathway} object corresponding to the pathway specified by
+  \code{pathcode}. This object contains the parsed KEGG pathway structure and
+  can be used as input to downstream graph conversion and visualization
+  functions.
+}
 \description{
 Returns an object of KEGGPathway of the pathway especified in pathcode
+}
+\examples{
+\dontrun{
+path <- get_MetabolitePath("hsa00010")
+class(path)
+}
+
 }

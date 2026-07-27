@@ -1,114 +1,147 @@
-
 nmr_identification = function(dataset, ppm.tol, frequency_scores, solvent_scores, organism_scores,
-                              method='Match_uniq', per.sample=FALSE, tresh_zero=0, alpha=10e-4){
+                              method='Match_uniq', per.sample=FALSE, tresh_zero=0, alpha=10e-4,
+                              verbose = TRUE){
   
-  if(!method%in%c('Match_uniq', 'Hyper', 'Hyper_uniq')) stop('Invalid method. Valid methods: Match_uniq, Hyper or Hyper_uniq')
+  if(!method %in% c('Match_uniq', 'Hyper', 'Hyper_uniq')) {
+    stop('Invalid method. Valid methods: Match_uniq, Hyper or Hyper_uniq')
+  }
   
-  if(is.null(frequency_scores)|is.null(solvent_scores)|is.null(organism_scores)){
+  if(is.null(frequency_scores) | is.null(solvent_scores) | is.null(organism_scores)) {
     stop('Arguments missing: frequency_scores, solvent_score or organism_scores. Please check help page of the function to know how to set them')
   }
   
-  res=list()
-  
-  #UNIQUENESS SCORES:
-  if(method%in%c('Match_uniq','Hyper_uniq')){
-    message("Calculating uniqueness scores...")
-    uniq_scores=uniqueness_scores(0)
-    message("Done\n")
-  }
-  else uniq_scores = NULL
-  #Total number of peaks in library:
-  if(method%in%c('Hyper','Hyper_uniq')) n_peaks_total = length(unique(unlist(spectra_list)))
-  else n_peaks_total = NULL
-  
-  ###GETTING COMPOUNDS FOR ORGANISM SCORES
-  message("Getting compounds for organism scores...\n")
-  all_orgs=get_OrganismsCodes()
-  cpds_groups=list()
-  for(group in names(organism_scores)){
-    if (!group%in%c("other", "not_in_kegg")) message("-- Getting compounds from ", group, "\n")
-    if(is_organism(group)) cpds_groups[[group]]=compounds_in_organism(group)
-    else if (is_group(group, all_orgs)) cpds_groups[[group]]=compounds_in_group(group, all_orgs)
-  }
-  message('Done\n')
-  
-  #PERFORM IDENTIFICATION:
-  if(!per.sample){
-    samples_peaks = as.numeric(rownames(dataset$data))
-    return(identification_nmr_peaks(samples_peaks, method, ppm.tol, frequency_scores, solvent_scores,
-                                    organism_scores, cpds_groups,
-                                    uniq_scores, n_peaks_total, alpha))
-  }
   res = list()
-  for(samp in colnames(dataset$data)){
-    message('-SAMPLE', samp, '\n')
-    sample_peaks=as.numeric(names(dataset$data[dataset$data[,samp]>tresh_zero,1]))
-    res[[samp]] = identification_nmr_peaks(sample_peaks, method, ppm.tol, frequency_scores, solvent_scores,
-                                           organism_scores, cpds_groups,
-                                           uniq_scores,n_peaks_total, alpha)
+  
+  if(method %in% c('Match_uniq', 'Hyper_uniq')) {
+    if (verbose) message("Calculating uniqueness scores...")
+    uniq_scores = uniqueness_scores(0)
+    if (verbose) message("Done")
+  } else {
+    uniq_scores = NULL
+  }
+  
+  if(method %in% c('Hyper', 'Hyper_uniq')) {
+    n_peaks_total = length(unique(unlist(spectra_list)))
+  } else {
+    n_peaks_total = NULL
+  }
+  
+  if (verbose) message("Getting compounds for organism scores...")
+  all_orgs = get_OrganismsCodes()
+  cpds_groups = list()
+  for(group in names(organism_scores)) {
+    if (!group %in% c("other", "not_in_kegg")) {
+      if (verbose) message("-- Getting compounds from ", group)
+    }
+    if(is_organism(group)) {
+      cpds_groups[[group]] = compounds_in_organism(group)
+    } else if (is_group(group, all_orgs)) {
+      cpds_groups[[group]] = compounds_in_group(group, all_orgs)
+    }
+  }
+  if (verbose) message("Done")
+  
+  if(!per.sample) {
+    samples_peaks = as.numeric(rownames(dataset$data))
+    return(
+      identification_nmr_peaks(
+        sample_peaks = samples_peaks,
+        method = method,
+        ppm.tol = ppm.tol,
+        frequency_scores = frequency_scores,
+        solvent_scores = solvent_scores,
+        organism_scores = organism_scores,
+        cpds_groups = cpds_groups,
+        uniq_scores = uniq_scores,
+        n_peaks_total = n_peaks_total,
+        alpha = alpha,
+        verbose = verbose
+      )
+    )
+  }
+  
+  res = list()
+  for(samp in colnames(dataset$data)) {
+    if (verbose) message("-SAMPLE ", samp)
+    sample_peaks = as.numeric(names(dataset$data[dataset$data[, samp] > tresh_zero, 1]))
+    res[[samp]] = identification_nmr_peaks(
+      sample_peaks = sample_peaks,
+      method = method,
+      ppm.tol = ppm.tol,
+      frequency_scores = frequency_scores,
+      solvent_scores = solvent_scores,
+      organism_scores = organism_scores,
+      cpds_groups = cpds_groups,
+      uniq_scores = uniq_scores,
+      n_peaks_total = n_peaks_total,
+      alpha = alpha,
+      verbose = verbose
+    )
   }
   return(res)
 }
-
-
 
 identification_nmr_peaks = function(sample_peaks, method, ppm.tol, frequency_scores, solvent_scores,
                                     organism_scores, cpds_groups,
-                                    uniq_scores=NULL, n_peaks_total=NULL, alpha=10e-4){
+                                    uniq_scores = NULL, n_peaks_total = NULL, alpha = 10e-4,
+                                    verbose = TRUE){
   
-  message("Matching samples to reference peaks...")
-  if(method=="Hyper") res = Hyper_method(sample_peaks, ppm.tol, n_peaks_total, alpha)
-  else if(method=="Hyper_uniq") res = Hyper_uniq_method(sample_peaks, ppm.tol, uniq_scores, n_peaks_total, alpha)
-  else res = Match_uniq_method(sample_peaks, ppm.tol, uniq_scores)
-  message("Done...\n")
+  if (verbose) message("Matching samples to reference peaks...")
+  if(method == "Hyper") {
+    res = Hyper_method(sample_peaks, ppm.tol, n_peaks_total, alpha)
+  } else if(method == "Hyper_uniq") {
+    res = Hyper_uniq_method(sample_peaks, ppm.tol, uniq_scores, n_peaks_total, alpha)
+  } else {
+    res = Match_uniq_method(sample_peaks, ppm.tol, uniq_scores)
+  }
+  if (verbose) message("Done")
   
-  message("Calculating Final scores...")
-  score=c()
-  score_frequency=c()
-  score_solvents=c()
-  score_organisms=c()
-  for(i in 1:dim(res$results_table)[1]){
-    reference_id=res$results_table$SPCMNS[i]
+  if (verbose) message("Calculating Final scores...")
+  score = c()
+  score_frequency = c()
+  score_solvents = c()
+  score_organisms = c()
+  for(i in 1:dim(res$results_table)[1]) {
+    reference_id = res$results_table$SPCMNS[i]
     
-    score_fr=score_freq(reference_id, frequency_scores)
-    score_solv=score_solvent(reference_id, solvent_scores)
-    score_org=score_organism(res$results_table$SPCMNM[i], cpds_groups, organism_scores)
-    score_final=(res$results_table$match_score[i]+score_fr+score_solv+score_org)/4
+    score_fr = score_freq(reference_id, frequency_scores)
+    score_solv = score_solvent(reference_id, solvent_scores)
+    score_org = score_organism(res$results_table$SPCMNM[i], cpds_groups, organism_scores)
+    score_final = (res$results_table$match_score[i] + score_fr + score_solv + score_org) / 4
     
-    score=c(score, score_final)
-    score_frequency=c(score_frequency, score_fr)
-    score_solvents=c(score_solvents, score_solv)
-    score_organisms=c(score_organisms, score_org)
+    score = c(score, score_final)
+    score_frequency = c(score_frequency, score_fr)
+    score_solvents = c(score_solvents, score_solv)
+    score_organisms = c(score_organisms, score_org)
   }
   
-  if(method=='Hyper'){
-    res$results_table = cbind(res$results_table[,c('SPCMNM','Name','SPCMNS')],
+  if(method == 'Hyper') {
+    res$results_table = cbind(res$results_table[, c('SPCMNM', 'Name', 'SPCMNS')],
                               score,
-                              res$results_table[,c('match_score')],
+                              res$results_table[, c('match_score')],
                               score_frequency, score_solvents, score_organisms,
-                              res$results_table[,c('n.peaks.matched','detailed_results_id')])
+                              res$results_table[, c('n.peaks.matched', 'detailed_results_id')])
     colnames(res$results_table)[5] = 'match_score'
   }
-  else if(method=='Hyper_uniq'){
-    res$results_table = cbind(res$results_table[,c('SPCMNM','Name','SPCMNS')],
+  else if(method == 'Hyper_uniq') {
+    res$results_table = cbind(res$results_table[, c('SPCMNM', 'Name', 'SPCMNS')],
                               score,
-                              res$results_table[,c('match_score', 'hypergeometric_score', 'uniqueness_score')],
+                              res$results_table[, c('match_score', 'hypergeometric_score', 'uniqueness_score')],
                               score_frequency, score_solvents, score_organisms,
-                              res$results_table[,c('n.peaks.matched','detailed_results_id')])
+                              res$results_table[, c('n.peaks.matched', 'detailed_results_id')])
   }
-  else{
-    res$results_table = cbind(res$results_table[,c('SPCMNM','Name','SPCMNS')],
+  else {
+    res$results_table = cbind(res$results_table[, c('SPCMNM', 'Name', 'SPCMNS')],
                               score,
-                              res$results_table[,c('match_score', 'ratio', 'uniqueness_score')],
+                              res$results_table[, c('match_score', 'ratio', 'uniqueness_score')],
                               score_frequency, score_solvents, score_organisms,
-                              res$results_table[,c('n.peaks.matched','detailed_results_id')])
+                              res$results_table[, c('n.peaks.matched', 'detailed_results_id')])
   }
   colnames(res$results_table)[4] = 'Final_Score'
-  res$results_table=res$results_table[order(res$results_table$Final_Score, decreasing=TRUE),]
-  message("Done.\n")
+  res$results_table = res$results_table[order(res$results_table$Final_Score, decreasing = TRUE), ]
+  if (verbose) message("Done.")
   return(res)
 }
-
 
 Hyper_method = function(peaks, ppm.tol, n_peaks_total, alpha=10e-4){
   res = list()
@@ -153,11 +186,8 @@ Hyper_method = function(peaks, ppm.tol, n_peaks_total, alpha=10e-4){
   res$results_table = res$results_table[maintain_non_zeros,]
   res$more_results = res$more_results[maintain_non_zeros_detailed]
   
-  
   return(res)
 }
-
-
 
 Hyper_uniq_method = function(peaks, ppm.tol, uniq_scores, n_peaks_total, alpha=10e-4){
   res = list()
@@ -214,8 +244,6 @@ Hyper_uniq_method = function(peaks, ppm.tol, uniq_scores, n_peaks_total, alpha=1
   return(res)
 }
 
-
-
 Match_uniq_method = function(peaks, ppm.tol, uniq_scores){
   res = list()
   Name=c()
@@ -255,30 +283,24 @@ Match_uniq_method = function(peaks, ppm.tol, uniq_scores){
   return(res)
 }
 
-
-
 match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03){
   l.samp=length(sample_peaks)
   l.ref=length(refMetab_peaks)
   
   res=list()
   
-  #Save the peaks from the cluster and references that matched:
   matched_peaks_samp=c()
   matched_peaks_ref=c()
   
-  #Sort sample and reference peaks:
   sample_peaks=sort(sample_peaks)
   refMetab_peaks=sort(refMetab_peaks)
   
-  #Variables to calculate hypergeometric test:
   matched_peaks=0
   n_ref_peaks=l.ref
   n_notRef_peaks=n_peaks_total-n_ref_peaks
   n_samp_peaks=l.samp
   
   if (l.samp<l.ref){
-    #For each sample peak, compare it to the reference peaks:
     last_pR=1
     for(pS in 1:length(sample_peaks)){
       if (last_pR>l.ref) break
@@ -287,14 +309,8 @@ match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03)
         if(round(sample_peaks[pS],3) < round(inf_limit,3)) break
         sup_limit=refMetab_peaks[pR]+PPMTOL
         if(round(sample_peaks[pS],3) <= round(sup_limit,3)){
-          #if(multiplets){
-          #  n_multiplets = sum(refMetab_peaks == refMetab_peaks[pR])
-          #  matched_peaks = matched_peaks + n_multiplets
-          #}
-          #else{
           matched_peaks = matched_peaks + 1
           last_pR=pR+1
-          #}
           
           matched_peaks_samp=c(matched_peaks_samp, round(sample_peaks[pS],3))
           matched_peaks_ref=c(matched_peaks_ref, round(refMetab_peaks[pR],3))
@@ -304,10 +320,7 @@ match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03)
     }
   }
   else{
-    #For each reference peak, compare it to the sample peaks:
     last_pS=1
-    #if(multiplets) refids = which(!duplicated(refMetab_peaks))
-    #else refids = 1:refMetab_peaks
     for(pR in 1:length(refMetab_peaks)){
       if (last_pS>l.samp) break
       for(pS in last_pS:l.samp){
@@ -315,8 +328,6 @@ match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03)
         if(round(refMetab_peaks[pR],3) < round(inf_limit,3)) break
         sup_limit=sample_peaks[pS]+PPMTOL
         if(round(refMetab_peaks[pR],3) <= round(sup_limit,3)){
-          #if(multiplets) matched_peaks = matched_peaks + sum(refMetab_peaks == refMetab_peaks[pR])
-          #else
           matched_peaks = matched_peaks + 1
           last_pS=pS+1
           
@@ -328,10 +339,8 @@ match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03)
     }
   }
   
-  #Calculate hypergeometric test:
   ht=dhyper(matched_peaks, n_ref_peaks, n_notRef_peaks, n_samp_peaks)
   
-  #Store results:
   res$matched_peaks_ref=matched_peaks_ref
   res$matched_peaks_samp=matched_peaks_samp
   res$reference_peaks=refMetab_peaks
@@ -341,19 +350,15 @@ match_Hyper = function(sample_peaks, refMetab_peaks, n_peaks_total, PPMTOL=0.03)
   return(res)
 }
 
-
-
 match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.03){
   l.samp=length(sample_peaks)
   l.ref=length(refMetab_peaks)
   
   res=list()
   
-  #Save the peaks from the cluster and references that matched:
   matched_peaks_samp=c()
   matched_peaks_ref=c()
   
-  #Sort sample and reference peaks:
   sample_peaks=sort(sample_peaks)
   refMetab_peaks=sort(refMetab_peaks)
   
@@ -361,7 +366,6 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
   n_ref_peaks=l.ref
   n_samp_peaks=l.samp
   if (l.samp<l.ref){
-    #For each sample peak, compare it to the reference peaks:
     last_pR=1
     for(pS in 1:length(sample_peaks)){
       if (last_pR>l.ref) break
@@ -370,14 +374,8 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
         if(round(sample_peaks[pS],3) < round(inf_limit,3)) break
         sup_limit=refMetab_peaks[pR]+PPMTOL
         if(round(sample_peaks[pS],3) <= round(sup_limit,3)){
-          #if(multiplets){
-          #  n_multiplets = sum(refMetab_peaks == refMetab_peaks[pR])
-          #  matched_peaks = matched_peaks + n_multiplets
-          #}
-          #else{
           matched_peaks = matched_peaks + 1
           last_pR=pR+1
-          #}
           
           matched_peaks_samp=c(matched_peaks_samp, round(sample_peaks[pS],3))
           matched_peaks_ref=c(matched_peaks_ref, round(refMetab_peaks[pR],3))
@@ -387,10 +385,7 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
     }
   }
   else{
-    #For each reference peak, compare it to the sample peaks:
     last_pS=1
-    #if(multiplets) refids = which(!duplicated(refMetab_peaks))
-    #else refids = 1:refMetab_peaks
     for(pR in 1:length(refMetab_peaks)){
       if (last_pS>l.samp) break
       for(pS in last_pS:l.samp){
@@ -398,8 +393,6 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
         if(round(refMetab_peaks[pR],3) < round(inf_limit,3)) break
         sup_limit=sample_peaks[pS]+PPMTOL
         if(round(refMetab_peaks[pR],3) <= round(sup_limit,3)){
-          #if(multiplets) matched_peaks = matched_peaks + sum(refMetab_peaks == refMetab_peaks[pR])
-          #else
           matched_peaks = matched_peaks + 1
           last_pS=pS+1
           
@@ -411,11 +404,9 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
     }
   }
   
-  #Calculate Match_uniq score:
   if(matched_peaks==0) score = 0
   else score = ((matched_peaks/n_ref_peaks) + uniq_score) / 2
   
-  #Store results:
   res$matched_peaks_ref=matched_peaks_ref
   res$matched_peaks_samp=matched_peaks_samp
   res$reference_peaks=refMetab_peaks
@@ -427,7 +418,6 @@ match_Match_uniq = function(sample_peaks, refMetab_peaks, uniq_score, PPMTOL=0.0
   
   return(res)
 }
-
 
 uniqueness_scores = function(ppm_tolerance){
   
@@ -453,9 +443,6 @@ uniqueness_scores = function(ppm_tolerance){
   return(res)
 }
 
-
-
-
 ###DATA CONVERSION
 ##SPCMNS-->SPCMNM
 get_spcmnm_from_spcmns=function(spcmns){
@@ -478,8 +465,6 @@ convert_chebi_to_spcmnm=function(chebi){
   }
   return(spcmnms)
 }
-
-
 
 ###SCORES
 ##Frequency

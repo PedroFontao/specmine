@@ -2,8 +2,6 @@
 ########################### DBSCAN / HDBSCAN ###############################
 ############################################################################
 
-
-
 # perform DBSCAN clustering
 # eps         - radius of the epsilon neighbourhood
 # minPts      - minimum number of points required to form a dense region
@@ -13,8 +11,7 @@
 # write.file  - if TRUE, saves cluster assignments to a CSV file
 # file.out    - base name for output file
 
-
-dbscan_analysis_dataset = function(dataset, eps = 0.5, minPts = 5, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = "dbscan", ...) {
+dbscan_analysis_dataset = function(dataset, eps = 0.5, minPts = 5, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = NULL, ...) {
   if (!requireNamespace("dbscan", quietly = TRUE)) stop("Package 'dbscan' is required. Install it with: install.packages('dbscan')")
   mat_check = as.matrix(dataset$data)
   if (any(is.na(mat_check)) || any(is.nan(mat_check)) || any(is.infinite(mat_check))) {
@@ -32,14 +29,15 @@ dbscan_analysis_dataset = function(dataset, eps = 0.5, minPts = 5, scale = FALSE
   )
   if (!is.null(dbscan_model$isseed)) result$isseed = dbscan_model$isseed
   if (ret_model) result$model = dbscan_model
-  if (write.file) {
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.", call. = FALSE)
+    }
     out = data.frame(sample = names(clusters), cluster = clusters)
-    write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
+    utils::write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
   }
   return(result)
 }
-
-
 
 # perform HDBSCAN clustering
 # minPts      - minimum number of points required in the dense neighbourhood
@@ -49,8 +47,7 @@ dbscan_analysis_dataset = function(dataset, eps = 0.5, minPts = 5, scale = FALSE
 # write.file  - if TRUE, saves cluster assignments to a CSV file
 # file.out    - base name for output file
 
-
-hdbscan_analysis_dataset = function(dataset, minPts = 5, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = "hdbscan", ...) {
+hdbscan_analysis_dataset = function(dataset, minPts = 5, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = NULL, ...) {
   if (!requireNamespace("dbscan", quietly = TRUE)) stop("Package 'dbscan' is required. Install it with: install.packages('dbscan')")
   mat_check = as.matrix(dataset$data)
   if (any(is.na(mat_check)) || any(is.nan(mat_check)) || any(is.infinite(mat_check))) {
@@ -70,29 +67,27 @@ hdbscan_analysis_dataset = function(dataset, minPts = 5, scale = FALSE, seed = 4
     params = list(minPts = minPts, scale = scale, seed = seed)
   )
   if (ret_model) result$model = hdbscan_model
-  if (write.file) {
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.", call. = FALSE)
+    }
     out = data.frame(
       sample = names(clusters),
       cluster = clusters,
       membership_prob = hdbscan_model$membership_prob,
       outlier_scores = hdbscan_model$outlier_scores
     )
-    write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
+    utils::write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
   }
   return(result)
 }
 
-
-
 ########################## DBSCAN / HDBSCAN PLOTS ##########################
-
-
 
 # helper function to choose coordinates for plotting
 # method      - one of "pca", "umap", "tsne", "ica"
 # result.obj  - result object for methods that require it (umap/tsne/ica)
 # dims        - dimensions to plot
-
 
 .get_density_plot_data = function(dataset, method = "pca", result.obj = NULL, dims = c(1,2), scale = FALSE) {
   method = tolower(method)
@@ -123,19 +118,7 @@ hdbscan_analysis_dataset = function(dataset, minPts = 5, scale = FALSE, seed = 4
   plot.df
 }
 
-
-
 # 2d plot for DBSCAN clusters
-# method      - coordinates used for plotting: "pca", "umap", "tsne", "ica"
-# result.obj  - result object when method is umap/tsne/ica
-# dims        - dimensions to plot
-# labels      - if TRUE, shows sample names next to points
-# bw          - if TRUE, uses black and white with shapes instead of colours
-# leg.pos     - legend position
-# xlim        - optional x axis limits c(min, max)
-# ylim        - optional y axis limits c(min, max)
-
-
 dbscan_plot2D = function(dataset, dbscan.result, method = "pca", result.obj = NULL, dims = c(1,2), labels = FALSE, bw = FALSE, leg.pos = "right", xlim = NULL, ylim = NULL, scale = FALSE) {
   plot.df = .get_density_plot_data(dataset, method = method, result.obj = result.obj, dims = dims, scale = scale)
   plot.df$group = factor(dbscan.result$cluster)
@@ -171,19 +154,7 @@ dbscan_plot2D = function(dataset, dbscan.result, method = "pca", result.obj = NU
   p
 }
 
-
-
 # 2d plot for HDBSCAN clusters
-# method      - coordinates used for plotting: "pca", "umap", "tsne", "ica"
-# result.obj  - result object when method is umap/tsne/ica
-# dims        - dimensions to plot
-# labels      - if TRUE, shows sample names next to points
-# bw          - if TRUE, uses black and white with shapes instead of colours
-# leg.pos     - legend position
-# xlim        - optional x axis limits c(min, max)
-# ylim        - optional y axis limits c(min, max)
-
-
 hdbscan_plot2D = function(dataset, hdbscan.result, method = "pca", result.obj = NULL, dims = c(1,2), labels = FALSE, bw = FALSE, leg.pos = "right", xlim = NULL, ylim = NULL, scale = FALSE) {
   plot.df = .get_density_plot_data(dataset, method = method, result.obj = result.obj, dims = dims, scale = scale)
   plot.df$group = factor(hdbscan.result$cluster)
@@ -226,15 +197,7 @@ hdbscan_plot2D = function(dataset, hdbscan.result, method = "pca", result.obj = 
   p
 }
 
-
-
 # 3d plot for DBSCAN clusters (uses plotly)
-# method      - coordinates used for plotting: "umap", "tsne", "ica"
-# result.obj  - result object with embedding
-# dims        - dimensions to plot
-# title       - plot title
-
-
 dbscan_plot3D = function(dataset, dbscan.result, method = "umap", result.obj, dims = c(1,2,3), title = NULL) {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   method = tolower(method)
@@ -264,15 +227,7 @@ dbscan_plot3D = function(dataset, dbscan.result, method = "umap", result.obj, di
   ) %>% plotly::layout(title = title)
 }
 
-
-
 # 3d plot for HDBSCAN clusters (uses plotly)
-# method      - coordinates used for plotting: "umap", "tsne", "ica"
-# result.obj  - result object with embedding
-# dims        - dimensions to plot
-# title       - plot title
-
-
 hdbscan_plot3D = function(dataset, hdbscan.result, method = "umap", result.obj, dims = c(1,2,3), title = NULL) {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   method = tolower(method)
@@ -304,14 +259,7 @@ hdbscan_plot3D = function(dataset, hdbscan.result, method = "umap", result.obj, 
   ) %>% plotly::layout(title = title)
 }
 
-
-
 # pairs plot for DBSCAN clusters
-# method      - coordinates used for plotting: "umap", "tsne", "ica"
-# result.obj  - result object with embedding
-# dims        - dimensions to include (default: first 5)
-
-
 dbscan_pairs_plot = function(dataset, dbscan.result, method = "umap", result.obj, dims = 1:min(5, ncol(result.obj$embedding)), ...) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")
   if (missing(result.obj) || is.null(result.obj)) stop("result.obj is required")
@@ -323,14 +271,7 @@ dbscan_pairs_plot = function(dataset, dbscan.result, method = "umap", result.obj
   GGally::ggpairs(pairs.df, mapping = ggplot2::aes(color = group), ...)
 }
 
-
-
 # pairs plot for HDBSCAN clusters
-# method      - coordinates used for plotting: "umap", "tsne", "ica"
-# result.obj  - result object with embedding
-# dims        - dimensions to include (default: first 5)
-
-
 hdbscan_pairs_plot = function(dataset, hdbscan.result, method = "umap", result.obj, dims = 1:min(5, ncol(result.obj$embedding)), ...) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")
   if (missing(result.obj) || is.null(result.obj)) stop("result.obj is required")
@@ -342,25 +283,13 @@ hdbscan_pairs_plot = function(dataset, hdbscan.result, method = "umap", result.o
   GGally::ggpairs(pairs.df, mapping = ggplot2::aes(color = group), ...)
 }
 
-
-
 # optional prediction for new data using a fitted DBSCAN model
-# newdata      - matrix/data.frame with variables in columns and samples in rows
-# original.data - matrix/data.frame used to fit the original model
-
-
 dbscan_predict_newdata = function(dbscan.result, newdata, original.data) {
   if (is.null(dbscan.result$model)) stop("dbscan.result$model is required. Run dbscan_analysis_dataset(..., ret_model = TRUE).")
   stats::predict(dbscan.result$model, newdata = newdata, data = original.data)
 }
 
-
-
 # optional prediction for new data using a fitted HDBSCAN model
-# newdata      - matrix/data.frame with variables in columns and samples in rows
-# original.data - matrix/data.frame used to fit the original model
-
-
 hdbscan_predict_newdata = function(hdbscan.result, newdata, original.data) {
   if (is.null(hdbscan.result$model)) stop("hdbscan.result$model is required. Run hdbscan_analysis_dataset(..., ret_model = TRUE).")
   stats::predict(hdbscan.result$model, newdata = newdata, data = original.data)

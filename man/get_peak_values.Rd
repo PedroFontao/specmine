@@ -6,7 +6,24 @@
 \usage{
 get_peak_values(samples.df, peak.val)
 }
+\arguments{
+\item{samples.df}{A data frame of peak intensities with peaks in rows and samples in columns.}
+
+\item{peak.val}{Peak value identifying the row to extract.}
+}
+\value{
+A numeric vector with the intensity values for the peak specified by \code{peak.val} across all samples in \code{samples.df}.
+}
 \description{
 Auto-exported function: get_peak_values
+}
+\examples{
+samples.df <- data.frame(
+  s1 = c(10, 20),
+  s2 = c(15, NA),
+  row.names = c("1", "2")
+)
+get_peak_values(samples.df, "1")
+
 }
 \keyword{internal}

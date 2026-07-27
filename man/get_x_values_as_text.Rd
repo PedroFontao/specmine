@@ -10,8 +10,26 @@ get_x_values_as_text(dataset)
 \item{dataset}{Dataset object.}
 }
 \value{
-Character vector with x values.
+A character vector containing the variable identifiers stored in
+  `rownames(dataset$data)`. Each element corresponds to one row of the data
+  matrix and represents the x-axis value or variable label associated with
+  that feature.
 }
 \description{
 Returns the x values of a dataset as text.
+}
+\examples{
+datamatrix <- matrix(
+  c(1, 2, 3, 4),
+  nrow = 2,
+  dimnames = list(c("10.5", "11.0"), c("s1", "s2"))
+)
+metadata <- data.frame(class = c("A", "B"), row.names = c("s1", "s2"))
+dataset <- create_dataset(
+  datamatrix,
+  type = "concentrations",
+  metadata = metadata
+)
+get_x_values_as_text(dataset)
+
 }

@@ -3,6 +3,17 @@
 #' Auto-exported function: convert_from_chemospec
 #'
 #' @keywords internal
+#' @return A \code{dataset} object converted from a ChemoSpec object, containing the transposed data matrix, metadata, sample names, and axis/unit labels.
+#' @examples
+#' csobj <- list(
+#'   data = matrix(c(10, 20, 30, 40), nrow = 2, byrow = TRUE),
+#'   freq = c(1, 2),
+#'   groups = c("A", "B"),
+#'   names = c("sample1", "sample2"),
+#'   unit = c("ppm", "intensity")
+#' )
+#' dataset <- convert_from_chemospec(csobj)
+#' class(dataset)
 #' @export
 
 convert_from_chemospec = function(csobj, type = "undefined", description = "") {
@@ -17,4 +28,3 @@ convert_from_chemospec = function(csobj, type = "undefined", description = "") {
                            label.x = label.x, label.values = label.val)
   dataset
 }
-

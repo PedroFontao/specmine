@@ -14,7 +14,38 @@ pca_plot_3d(
   ...
 )
 }
+\arguments{
+\item{dataset}{A dataset object containing metadata.}
+
+\item{model}{A PCA result object containing component scores.}
+
+\item{var.class}{The metadata variable used to define classes.}
+
+\item{pcas}{A length-3 integer vector indicating which principal components to plot.}
+
+\item{colors}{Optional vector of colors used for the classes.}
+
+\item{legend.place}{Position of the legend.}
+
+\item{...}{Additional arguments passed to \code{legend()}.}
+}
+\value{
+A 3D scatter plot of the selected principal components, drawn for its side effects.
+}
 \description{
-Auto-exported function: pca_plot_3d
+Draw a 3D PCA scatter plot.
+}
+\examples{
+\dontrun{
+datamat <- matrix(
+  rnorm(24),
+  nrow = 4,
+  dimnames = list(paste0("v", 1:4), paste0("s", 1:6))
+)
+metadata <- data.frame(class = factor(c("A", "A", "A", "B", "B", "B")))
+dataset <- list(data = datamat, metadata = metadata)
+pca_model <- list(scores = prcomp(t(datamat))$x)
+pca_plot_3d(dataset, pca_model, "class")
+}
 }
 \keyword{internal}

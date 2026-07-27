@@ -50,6 +50,14 @@ Import for Thermo Galactic's spc file format
 These functions allow to import .spc files.
 A detailed description of the .spc file format is available at
 }
+\examples{
+\donttest{
+filename <- system.file("extdata", "toy.spc", package = "specmine")
+if (nzchar(filename)) {
+  read_spc_nosubhdr(filename)
+}
+}
+}
 \references{
 Reference information for the SPC file format.
 }

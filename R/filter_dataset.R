@@ -1,5 +1,3 @@
-# R/filter_datasets.R
-
 # Functions that allow to filter the dataset by some criteria
 
 # SUBSET functions - allow to define criteria for the information to keep
@@ -15,7 +13,22 @@
 #' @param samples Vector with indexes or names of the samples to select.
 #' @param rebuild.factors If TRUE, rebuild factors in metadata.
 #'
-#' @return Dataset with selected samples.
+#' @return A dataset object with the same overall structure as the input, containing
+#'   only the selected samples in both `dataset$data` and `dataset$metadata`. If
+#'   `rebuild.factors` is `TRUE`, unused factor levels in metadata are dropped.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, 2, 3, 4, 5, 6),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "B", "A")),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_samples(dataset, c("s1", "s3"))
 #'
 #' @export
 subset_samples = function(dataset, samples, rebuild.factors = TRUE) {
@@ -37,7 +50,21 @@ subset_samples = function(dataset, samples, rebuild.factors = TRUE) {
 #' @param metadata.varname Metadata variable name.
 #' @param values Values to keep.
 #'
-#' @return Dataset with selected samples.
+#' @return A dataset object with the same structure as the input, containing only
+#'   samples whose `metadata.varname` value matches one of the requested `values`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, 2, 3, 4, 5, 6),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "B", "A")),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_samples_by_metadata_values(dataset, "class", "A")
 #'
 #' @export
 subset_samples_by_metadata_values = function(dataset, metadata.varname, values)
@@ -56,7 +83,22 @@ subset_samples_by_metadata_values = function(dataset, metadata.varname, values)
 #' @param dataset Dataset to subset.
 #' @param nsamples Number of samples to select.
 #'
-#' @return Dataset with selected random samples.
+#' @return A dataset object with the same structure as the input, containing a
+#'   random subset of `nsamples` samples.
+#'
+#' @examples
+#' set.seed(123)
+#' data <- matrix(
+#'   1:12,
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3", "s4"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "A", "B", "B")),
+#'   row.names = c("s1", "s2", "s3", "s4")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_random_samples(dataset, 2)
 #'
 #' @export
 subset_random_samples = function(dataset, nsamples)
@@ -73,7 +115,18 @@ subset_random_samples = function(dataset, nsamples)
 #' @param variables Variables to keep.
 #' @param by.index Logical. If TRUE, variables are interpreted as row indexes.
 #'
-#' @return Dataset with selected x values.
+#' @return A dataset object with the same structure as the input, where
+#'   `dataset$data` contains only the selected variables or row indexes.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:9,
+#'   nrow = 3,
+#'   dimnames = list(c("10", "20", "30"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(group = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_x_values(dataset, c("10", "30"))
 #'
 #' @export
 subset_x_values = function(dataset, variables, by.index = FALSE) {
@@ -94,7 +147,19 @@ subset_x_values = function(dataset, variables, by.index = FALSE) {
 #' @param min.value Minimum x value.
 #' @param max.value Maximum x value.
 #'
-#' @return Dataset with selected x values.
+#' @return A dataset object with the same structure as the input, where
+#'   `dataset$data` contains only variables whose x values fall between
+#'   `min.value` and `max.value`, inclusive.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:12,
+#'   nrow = 4,
+#'   dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(group = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_x_values_by_interval(dataset, 15, 35)
 #'
 #' @export
 subset_x_values_by_interval = function(dataset, min.value, max.value)
@@ -115,7 +180,24 @@ subset_x_values_by_interval = function(dataset, min.value, max.value)
 #' @param variable.bounds Optional numeric bounds for x values.
 #' @param rebuild.factors If TRUE, rebuild factors in metadata.
 #'
-#' @return Subset dataset.
+#' @return A dataset object with the same overall structure as the input,
+#'   containing only the selected samples and selected x values. The returned
+#'   object includes the corresponding subset of `dataset$data` and matching
+#'   rows of `dataset$metadata`; factor levels are rebuilt when
+#'   `rebuild.factors = TRUE`.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:12,
+#'   nrow = 4,
+#'   dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "B", "A")),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_by_samples_and_xvalues(dataset, samples = c(1, 3), variables = c("10", "30"))
 #'
 #' @export
 subset_by_samples_and_xvalues = function(dataset, samples, variables = NULL, by.index = FALSE, 
@@ -151,7 +233,22 @@ subset_by_samples_and_xvalues = function(dataset, samples, variables = NULL, by.
 #' @param dataset Dataset to subset.
 #' @param variables Metadata variables to keep.
 #'
-#' @return Dataset with selected metadata variables.
+#' @return A dataset object with the same structure as the input, where
+#'   `dataset$metadata` contains only the selected metadata variables.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:6,
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = c("A", "B", "A"),
+#'   batch = c(1, 1, 2),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' subset_metadata(dataset, "class")
 #'
 #' @export
 subset_metadata = function(dataset, variables)
@@ -173,7 +270,19 @@ subset_metadata = function(dataset, variables)
 #' @param by.index Logical. If TRUE, data.to.remove has indexes.
 #' @param rebuild.factors Logical. If TRUE, rebuild factors in metadata.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same overall structure as the input, where
+#'   the requested samples, data variables, or metadata variables have been
+#'   removed according to `type`.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:9,
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_data(dataset, "s2", type = "sample")
 #'
 #' @export
 remove_data = function(dataset, data.to.remove, type = "sample", by.index = FALSE, rebuild.factors = TRUE) {
@@ -195,7 +304,22 @@ remove_data = function(dataset, data.to.remove, type = "sample", by.index = FALS
 #' @param samples.to.remove Samples to remove.
 #' @param rebuild.factors Logical. If TRUE, rebuild factors in metadata.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, with the
+#'   selected samples removed from both `dataset$data` and `dataset$metadata`.
+#'   If `rebuild.factors` is `TRUE`, unused factor levels in metadata are dropped.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:9,
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "B", "A")),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_samples(dataset, "s2")
 #'
 #' @export
 remove_samples = function(dataset, samples.to.remove, rebuild.factors = TRUE) {
@@ -216,7 +340,19 @@ remove_samples = function(dataset, samples.to.remove, rebuild.factors = TRUE) {
 #' @param variables.to.remove Variables to remove.
 #' @param by.index Logical. If TRUE, variables.to.remove are indexes.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where the
+#'   selected rows of `dataset$data` have been removed. If no matching variables
+#'   are found, the input dataset is returned unchanged and a warning is issued.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:9,
+#'   nrow = 3,
+#'   dimnames = list(c("10", "20", "30"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_data_variables(dataset, "20")
 #'
 #' @export
 remove_data_variables = function(dataset, variables.to.remove, by.index = FALSE) {
@@ -241,7 +377,19 @@ remove_data_variables = function(dataset, variables.to.remove, by.index = FALSE)
 #' @param min.value Minimum x value.
 #' @param max.value Maximum x value.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where all
+#'   variables with x values between `min.value` and `max.value`, inclusive,
+#'   have been removed from `dataset$data`.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:12,
+#'   nrow = 4,
+#'   dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_x_values_by_interval(dataset, 15, 35)
 #'
 #' @export
 remove_x_values_by_interval = function(dataset, min.value, max.value)
@@ -258,7 +406,24 @@ remove_x_values_by_interval = function(dataset, min.value, max.value)
 #' @param dataset Dataset to modify.
 #' @param variables.to.remove Metadata variables to remove.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where the
+#'   selected columns have been removed from `dataset$metadata`. If no matching
+#'   metadata fields are found, the dataset is returned unchanged and a warning
+#'   is issued.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:6,
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = c("A", "B", "A"),
+#'   batch = c(1, 1, 2),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_metadata_variables(dataset, "batch")
 #'
 #' @export
 remove_metadata_variables = function(dataset, variables.to.remove)
@@ -283,7 +448,21 @@ remove_metadata_variables = function(dataset, variables.to.remove)
 #' @param max.nas Maximum number of missing values allowed.
 #' @param by.percent Logical. If TRUE, max.nas is treated as a percentage.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where samples
+#'   whose number of missing values exceeds `max.nas` have been removed from both
+#'   `dataset$data` and `dataset$metadata`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 3,
+#'     4,  5, NA,
+#'     7,  8, 9),
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_samples_by_nas(dataset, max.nas = 0)
 #'
 #' @export
 remove_samples_by_nas = function(dataset, max.nas = 0, by.percent = FALSE)
@@ -301,7 +480,21 @@ remove_samples_by_nas = function(dataset, max.nas = 0, by.percent = FALSE)
 #' @param dataset Dataset to modify.
 #' @param metadata.var Metadata variable name.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where samples
+#'   with missing values in the selected metadata variable have been removed.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:9,
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = c("A", NA, "B"),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_samples_by_na_metadata(dataset, "class")
 #'
 #' @export
 remove_samples_by_na_metadata = function(dataset, metadata.var)
@@ -318,7 +511,21 @@ remove_samples_by_na_metadata = function(dataset, metadata.var)
 #' @param max.nas Maximum number of missing values allowed.
 #' @param by.percent Logical. If TRUE, max.nas is treated as a percentage.
 #'
-#' @return Modified dataset.
+#' @return A dataset object with the same structure as the input, where variables
+#'   whose number of missing values exceeds `max.nas` have been removed from
+#'   `dataset$data`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1,  2, 3,
+#'     NA, 5, NA,
+#'     7,  8, 9),
+#'   nrow = 3,
+#'   dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' remove_variables_by_nas(dataset, max.nas = 1)
 #'
 #' @export
 remove_variables_by_nas = function(dataset, max.nas = 0, by.percent = FALSE)
@@ -342,13 +549,30 @@ remove_variables_by_nas = function(dataset, max.nas = 0, by.percent = FALSE)
 #' @param aggreg.fn Aggregation function (e.g. "mean", "median", etc).
 #' @param meta.to.remove Metadata variables to be removed.
 #'
-#' @return Returns the dataset with the samples aggregated.
+#' @return A dataset object in which samples have been aggregated according to
+#'   `indexes` and `aggreg.fn`, with updated `data`, `metadata`, and preserved
+#'   dataset-level fields such as labels, type, and description.
 #'
 #' @examples
-#' if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-#'   data(propolis, package = "specmine.datasets")
-#'   dataset = aggregate_samples(propolis, as.integer(propolis$metadata$seasons), "mean")
-#' }
+#' data <- matrix(
+#'   c(1, 2, 10, 12,
+#'     3, 4, 14, 16),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3", "s4"))
+#' )
+#' metadata <- data.frame(
+#'   class = factor(c("A", "A", "B", "B")),
+#'   batch = c(1, 1, 2, 2),
+#'   row.names = c("s1", "s2", "s3", "s4")
+#' )
+#' dataset <- list(
+#'   data = data,
+#'   metadata = metadata,
+#'   labels = list(),
+#'   type = "example",
+#'   description = "toy dataset"
+#' )
+#' aggregate_samples(dataset, c(1, 1, 2, 2), "mean")
 #'
 #' @keywords aggregation sample
 #' @export
@@ -406,7 +630,22 @@ remove_variables_by_nas = function(dataset, max.nas = 0, by.percent = FALSE)
 #' @param x.values X values to keep.
 #' @param by.index Logical. If TRUE, x.values are indexes.
 #'
-#' @return A data frame with merged data and metadata.
+#' @return A `data.frame` containing the selected data matrix, transposed so that
+#'   samples are rows, combined with the selected metadata columns.
+#'
+#' @examples
+#' data <- matrix(
+#'   1:6,
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = c("A", "B", "A"),
+#'   batch = c(1, 1, 2),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(data = data, metadata = metadata)
+#' merge_data_metadata(dataset, metadata.vars = "class")
 #'
 #' @export
 merge_data_metadata = function(dataset, samples = NULL, metadata.vars = NULL, x.values = NULL, 
@@ -432,7 +671,18 @@ merge_data_metadata = function(dataset, samples = NULL, metadata.vars = NULL, x.
 #'
 #' @param dataset Dataset to inspect.
 #'
-#' @return Total missing values.
+#' @return A single numeric value giving the total count of `NA` entries present
+#'   in `dataset$data`.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 3, 4),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2"))
+#' )
+#' metadata <- data.frame(class = c("A", "B"), row.names = c("s1", "s2"))
+#' dataset <- list(data = data, metadata = metadata)
+#' count_missing_values(dataset)
 #'
 #' @export
 count_missing_values = function(dataset)
@@ -447,7 +697,20 @@ count_missing_values = function(dataset)
 #' @param dataset Dataset to inspect.
 #' @param remove.zero If TRUE, removes zero counts.
 #'
-#' @return Vector of missing values counts.
+#' @return A named numeric vector giving the number of missing values for each
+#'   sample in `dataset$data`. If `remove.zero` is `TRUE`, only samples with at
+#'   least one missing value are returned.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, NA, 3,
+#'     4,  5, NA),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' count_missing_values_per_sample(dataset)
 #'
 #' @export
 count_missing_values_per_sample = function(dataset, remove.zero = TRUE) {
@@ -463,7 +726,20 @@ count_missing_values_per_sample = function(dataset, remove.zero = TRUE) {
 #' @param dataset Dataset to inspect.
 #' @param remove.zero If TRUE, removes zero counts.
 #'
-#' @return Vector of missing values counts.
+#' @return A named numeric vector giving the number of missing values for each
+#'   variable in `dataset$data`. If `remove.zero` is `TRUE`, only variables with
+#'   at least one missing value are returned.
+#'
+#' @examples
+#' data <- matrix(
+#'   c(1, 2, NA,
+#'     4, 5, NA),
+#'   nrow = 2,
+#'   dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+#' dataset <- list(data = data, metadata = metadata)
+#' count_missing_values_per_variable(dataset)
 #'
 #' @export
 count_missing_values_per_variable = function(dataset, remove.zero = TRUE) {

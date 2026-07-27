@@ -8,7 +8,7 @@
 # - davies-bouldin (lower is better)
 
 cluster_quality_metrics = function(dataset, clusters, scale = FALSE, remove.noise = TRUE,
-                                   write.file = FALSE, file.out = "cluster_quality") {
+                                   write.file = FALSE, file.out = NULL) {
   if (!requireNamespace("clusterCrit", quietly = TRUE)) {
     stop("Package 'clusterCrit' is required. Install it with: install.packages('clusterCrit')")
   }
@@ -57,7 +57,10 @@ cluster_quality_metrics = function(dataset, clusters, scale = FALSE, remove.nois
     params = list(scale = scale, remove.noise = remove.noise)
   )
   
-  if (write.file) {
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.", call. = FALSE)
+    }
     out = data.frame(
       n_samples = nrow(x),
       n_clusters = n_clusters,
@@ -65,7 +68,7 @@ cluster_quality_metrics = function(dataset, clusters, scale = FALSE, remove.nois
       calinski_harabasz = unname(crit$calinski_harabasz),
       davies_bouldin = unname(crit$davies_bouldin)
     )
-    write.csv(out, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
+    utils::write.csv(out, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
   }
   
   return(result)
@@ -147,7 +150,7 @@ continuity_metric = function(original_data, embedded_data, n_neighbors = 5) {
 
 # global embedding quality function
 embedding_quality_metrics = function(dataset, embedding, scale = FALSE, n_neighbors = 5,
-                                     write.file = FALSE, file.out = "embedding_quality") {
+                                     write.file = FALSE, file.out = NULL) {
   mat_check = as.matrix(dataset$data)
   if (any(is.na(mat_check)) || any(is.nan(mat_check)) || any(is.infinite(mat_check))) {
     stop("dataset$data contains NA, NaN or Inf values. Please clean your data first.")
@@ -173,14 +176,17 @@ embedding_quality_metrics = function(dataset, embedding, scale = FALSE, n_neighb
     params = list(scale = scale, n_neighbors = n_neighbors)
   )
   
-  if (write.file) {
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.", call. = FALSE)
+    }
     out = data.frame(
       n_samples = nrow(original_data),
       n_components = ncol(embedding),
       trustworthiness = trust,
       continuity = cont
     )
-    write.csv(out, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
+    utils::write.csv(out, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
   }
   
   return(result)

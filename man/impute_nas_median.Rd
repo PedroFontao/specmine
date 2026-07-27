@@ -7,11 +7,24 @@
 impute_nas_median(dataset)
 }
 \arguments{
-\item{dataset}{Dataset to modify.}
+\item{dataset}{A dataset object to modify.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where missing
+  values in `dataset$data` have been replaced by the median of the corresponding
+  variable calculated with `na.rm = TRUE`.
 }
 \description{
-Impute missing values with median
+Replace missing values in each variable by the median of the observed values
+for that variable.
+}
+\examples{
+data <- matrix(
+  c(1, NA, 5, 4),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2"))
+)
+dataset <- list(data = data)
+impute_nas_median(dataset)
+
 }

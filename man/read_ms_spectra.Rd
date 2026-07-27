@@ -18,7 +18,41 @@ read_ms_spectra(
   sep.meta = ","
 )
 }
+\arguments{
+\item{folder.name}{Path to the folder containing LC/GC-MS raw files.}
+
+\item{type}{Dataset type.}
+
+\item{filename.meta}{Optional metadata filename.}
+
+\item{description}{Dataset description.}
+
+\item{prof.method}{Profiling method passed to \code{xcms::xcmsSet()}.}
+
+\item{fwhm}{Full width at half maximum used by \code{xcms}.}
+
+\item{bw}{Bandwidth used for grouping peaks.}
+
+\item{intvalue}{Intensity value extracted from \code{xcms} peak groups.}
+
+\item{header.col.meta}{Logical indicating whether metadata has column headers.}
+
+\item{header.row.meta}{Logical indicating whether metadata has row headers.}
+
+\item{sep.meta}{Metadata field separator.}
+}
+\value{
+A \code{dataset} object containing the processed LC/GC-MS spectra,
+  the sample metadata if provided, and the associated \code{xcms} object in
+  \code{xSet}.
+}
 \description{
 Auto-exported function: read_ms_spectra
+}
+\examples{
+\dontrun{
+folder.name <- "path/to/folder/with/mzml_or_mzxml_files"
+read_ms_spectra(folder.name, filename.meta = NULL)
+}
 }
 \keyword{internal}

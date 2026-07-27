@@ -23,14 +23,14 @@ absorbance_to_transmittance = function(dataset){
 # Smoothing - specmine (specmine.bin) and hyperspec (spc.loess)
 smoothing_interpolation = function(dataset, method = "bin", reducing.factor = 2, x.axis = NULL, p.order = 3, window = 11, deriv = 0, na.rm = TRUE){
   if (method == "bin") {
-		dataset = smoothing_spcbin(dataset, reducing.factor, na.rm = na.rm)
-	} 
+    dataset = smoothing_spcbin(dataset, reducing.factor, na.rm = na.rm)
+  } 
   else if (method == "loess") {
-		dataset = smoothing_spcloess(dataset, x.axis)
-	} else if (method == "savitzky.golay"){
-		dataset = savitzky_golay(dataset, p.order, window, deriv)
-	}
-	dataset
+    dataset = smoothing_spcloess(dataset, x.axis)
+  } else if (method == "savitzky.golay"){
+    dataset = savitzky_golay(dataset, p.order, window, deriv)
+  }
+  dataset
 }
 
 # Specmine binning smoothing interpolation
@@ -138,11 +138,11 @@ smoothing_spcloess <- function(dataset, x.axis = NULL){
   } else {
     new_wl <- wl
   }
-	if (is.null(x.axis)){
-		res.dataset <- specmine.loess(dataset, newx = new_wl, na.rm = TRUE)
-	} else {
-		res.dataset = specmine.loess(dataset, newx = x.axis, na.rm = TRUE)
-	}
+  if (is.null(x.axis)){
+    res.dataset <- specmine.loess(dataset, newx = new_wl, na.rm = TRUE)
+  } else {
+    res.dataset = specmine.loess(dataset, newx = x.axis, na.rm = TRUE)
+  }
   res.dataset$description = paste(dataset$description, "smoothed with specmine loess", sep="-")
   res.dataset$type = dataset$type
   res.dataset
@@ -192,45 +192,45 @@ specmine.loess <- function(dataset, newx, enp.target = nrow(dataset$data) / 4, s
 
 
 savitzky_golay = function(dataset, p.order, window, deriv = 0){
-    if (window %%2 != 1 || window < 0) 
-        stop("window size (window) must be a positive odd number")
-    if (p.order >= window) 
-        stop("window size (window) is too small for the polynomial order (p.order)")
-    if (p.order < deriv) 
-        stop("polynomial order p (p.order) should be geater or equal to differentiation order (deriv)")
-    X = t(dataset$data)
-    half_window = (window -1)/2
-    b = outer(-half_window:half_window, 0:p.order, "^")
-    A = MASS::ginv(b)
-    result = matrix(data = 0, ncol=ncol(X),nrow=nrow(X))
-    for (i in 1:nrow(X)){
-        first.values = X[i,1] - abs( X[i,1:(half_window)] - X[i,1] )
-        last.values = tail(X[i,], n = 1) + abs(X[i,(ncol(X)-half_window+1):ncol(X)] - tail(X[i,],n=1))
-        all = c(first.values, X[i,], last.values)
-        result[i,] = factorial(deriv) * convolve(all, A[deriv+1,], type="f")
-    }
-    colnames(result) = colnames(X)
-    dataset$data = t(result)
-    rownames(dataset$data) = colnames(X)
-    colnames(dataset$data) = rownames(X)
-    dataset$description = paste(dataset$description, "smoothed with savitzky-golay filter", sep = "-")
-    dataset
+  if (window %%2 != 1 || window < 0) 
+    stop("window size (window) must be a positive odd number")
+  if (p.order >= window) 
+    stop("window size (window) is too small for the polynomial order (p.order)")
+  if (p.order < deriv) 
+    stop("polynomial order p (p.order) should be geater or equal to differentiation order (deriv)")
+  X = t(dataset$data)
+  half_window = (window -1)/2
+  b = outer(-half_window:half_window, 0:p.order, "^")
+  A = MASS::ginv(b)
+  result = matrix(data = 0, ncol=ncol(X),nrow=nrow(X))
+  for (i in 1:nrow(X)){
+    first.values = X[i,1] - abs( X[i,1:(half_window)] - X[i,1] )
+    last.values = tail(X[i,], n = 1) + abs(X[i,(ncol(X)-half_window+1):ncol(X)] - tail(X[i,],n=1))
+    all = c(first.values, X[i,], last.values)
+    result[i,] = factorial(deriv) * convolve(all, A[deriv+1,], type="f")
+  }
+  colnames(result) = colnames(X)
+  dataset$data = t(result)
+  rownames(dataset$data) = colnames(X)
+  colnames(dataset$data) = rownames(X)
+  dataset$description = paste(dataset$description, "smoothed with savitzky-golay filter", sep = "-")
+  dataset
 } 
 
 
 # DATA CORRECTION - functions to do spectra correction
 
 "data_correction" = function(dataset, type = "background", method = "modpolyfit", ...){
-	if (type == "background"){
-		dataset = background_correction(dataset)
-	} 
+  if (type == "background"){
+    dataset = background_correction(dataset)
+  } 
   else if (type == "offset"){
-		dataset = offset_correction(dataset)
-	} 
+    dataset = offset_correction(dataset)
+  } 
   else if (type == "baseline"){
-		dataset = baseline_correction(dataset, method, ...)
-	} 
-	dataset
+    dataset = baseline_correction(dataset, method, ...)
+  } 
+  dataset
 }
 
 background_correction <- function(dataset) {
@@ -249,29 +249,71 @@ offset_correction <- function(dataset) {
 }
 
 # ... - extra parameters to baseline function
-#' 
+#'
 #' Auto-exported function: baseline_correction
+#'
+#' @param dataset Dataset to correct.
+#' @param method Baseline correction method passed to `baseline::baseline()`.
+#' @param ... Additional arguments passed to `baseline::baseline()`.
+#'
+#' @return A \code{dataset} object containing the baseline-corrected data. The
+#'   returned object has the same overall structure as the input dataset, with
+#'   corrected intensity values stored in \code{dataset$data}, original row and
+#'   column names preserved, and the description updated to record the baseline
+#'   correction step.
+#'
+#' @examples
+#' \donttest{
+#' datamatrix <- matrix(
+#'   c(5, 6, 7,
+#'     6, 7, 8,
+#'     7, 8, 9,
+#'     8, 9, 10,
+#'     9, 8, 7,
+#'     8, 7, 6,
+#'     7, 6, 5,
+#'     6, 5, 4),
+#'   nrow = 8,
+#'   byrow = TRUE,
+#'   dimnames = list(as.character(1:8), c("s1", "s2", "s3"))
+#' )
+#' metadata <- data.frame(
+#'   class = c("A", "A", "B"),
+#'   row.names = c("s1", "s2", "s3")
+#' )
+#' dataset <- list(
+#'   data = datamatrix,
+#'   metadata = metadata,
+#'   description = "toy spectra",
+#'   labels = list(x = "ppm", val = "intensity")
+#' )
+#' corrected <- try(
+#'   baseline_correction(dataset, method = "modpolyfit"),
+#'   silent = TRUE
+#' )
+#' corrected
+#' }
 #'
 #' @keywords internal
 #' @export
 baseline_correction = function(dataset, method = "modpolyfit", ...){
-	rnames = rownames(dataset$data)
-	cnames = colnames(dataset$data)
-	samples.df = t(dataset$data)
-	bl = baseline::baseline(samples.df, method = method, ...)
-	samples.df = baseline::getCorrected(bl)
+  rnames = rownames(dataset$data)
+  cnames = colnames(dataset$data)
+  samples.df = t(dataset$data)
+  bl = baseline::baseline(samples.df, method = method, ...)
+  samples.df = baseline::getCorrected(bl)
   dataset$data = t(samples.df)
-	rownames(dataset$data) = rnames
-	colnames(dataset$data) = cnames
+  rownames(dataset$data) = rnames
+  colnames(dataset$data) = cnames
   dataset$description = paste(dataset$description, "baseline correction", sep="; ")
-	dataset
+  dataset
 }
 
 # shifting spectra
 # method - "constant" - uses a constant shift that is added to the x.values
 # method - "interpolation" - uses interpolation - linear or spline according to "interp.function"
 # shift.val - value of the shift (for constant and interpolation methods); can be a single value for all spectra
-#			  "auto" - shifts are automatically determined
+#  "auto" - shifts are automatically determined
 # or a vector of length = number of samples; can also be the string "auto" for automatic calculation of shifts
 "shift_correction" = function(dataset, method = "constant", shift.val = 0, interp.function = "linear",
                               ref.limits = NULL) {
@@ -282,14 +324,14 @@ baseline_correction = function(dataset, method = "modpolyfit", ...){
     stop("Shift.val parameter has incorrect size: should be 1 or number of samples in the dataset")
   }
   else if (length(shift.val) == 1) {
-	if (shift.val == "auto") {
-        if (is.null(ref.limits) | length(ref.limits) != 2) {
-			stop("Parameter ref.limits incorrect for automatic determination of shifts")
-		}
-        else { 
-			shift.val = calculate_shifts(dataset, ref.limits)
-		}
-	}
+    if (shift.val == "auto") {
+      if (is.null(ref.limits) | length(ref.limits) != 2) {
+        stop("Parameter ref.limits incorrect for automatic determination of shifts")
+      }
+      else { 
+        shift.val = calculate_shifts(dataset, ref.limits)
+      }
+    }
   }
   if (method == "constant") {
     new.x.values = x.vals + shift.val

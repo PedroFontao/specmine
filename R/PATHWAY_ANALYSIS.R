@@ -7,9 +7,14 @@
 #' Returns compound names associated with KEGG compound identifiers.
 #'
 #' @param kegg_codes Character vector of KEGG compound identifiers.
-#' @return A vector or table with KEGG compound names.
+#' @return A named \code{character} vector in which the values are KEGG compound
+#'   identifiers and the names are the corresponding compound names. Each element
+#'   of the returned vector represents one KEGG compound code matched to its
+#'   primary compound name.
 #' @examples
-#' # get_cpd_names(c("C00031", "C00022"))
+#' \dontrun{
+#' get_cpd_names(c("C00031", "C00022"))
+#' }
 #' @export
 get_cpd_names=function(kegg_codes){
   if(!requireNamespace("KEGGREST", quietly = TRUE)){
@@ -52,7 +57,17 @@ get_cpd_names=function(kegg_codes){
 }
 
 #' Get kegg codes from hmdb codes:
-#' @param hmdb_codes TODO.
+#'
+#' @param hmdb_codes Character vector of HMDB identifiers.
+#' @return A named \code{character} vector with the KEGG compound identifiers
+#'   corresponding to the input HMDB codes. The vector values are KEGG compound
+#'   codes prefixed with \code{"cpd:"}, and the element names are the matched
+#'   compound names.
+#' @examples
+#' \dontrun{
+#' convert_hmdb_to_kegg(c("HMDB0000122"))
+#' }
+#' @export
 convert_hmdb_to_kegg=function(hmdb_codes){
   
   hmdbs=toupper(hmdb_codes)
@@ -76,8 +91,20 @@ convert_hmdb_to_kegg=function(hmdb_codes){
 }
 
 #' Get kegg codes from chebi codes:
-#' 
+#'
 #' Auto-exported function: convert_chebi_to_kegg
+#'
+#' @param chebi_codes Character vector of ChEBI identifiers.
+#'
+#' @return A named \code{character} vector with the KEGG compound identifiers
+#'   corresponding to the input ChEBI codes. The vector values are KEGG compound
+#'   codes prefixed with \code{"cpd:"}, and the element names are the matched
+#'   compound names.
+#'
+#' @examples
+#' \dontrun{
+#' convert_chebi_to_kegg(c("CHEBI:15377"))
+#' }
 #'
 #' @keywords internal
 #' @export
@@ -104,7 +131,19 @@ convert_chebi_to_kegg=function(chebi_codes){
 }
 
 #' Get kegg codes from spcmnm codes:
-#' @param spcmnm_codes TODO.
+#'
+#' @param spcmnm_codes Character vector of SPCMNM identifiers.
+#' @return A named \code{character} vector with the KEGG compound identifiers
+#'   corresponding to the input SPCMNM codes. The vector values are KEGG compound
+#'   codes prefixed with \code{"cpd:"}, and the element names are the matched
+#'   compound names.
+#'
+#' @examples
+#' \dontrun{
+#' convert_multiple_spcmnm_to_kegg(c("SPCM00001"))
+#' }
+#'
+#' @export
 convert_multiple_spcmnm_to_kegg=function(spcmnm_codes){
   
   spcmnms=toupper(spcmnm_codes)
@@ -129,6 +168,18 @@ convert_multiple_spcmnm_to_kegg=function(spcmnm_codes){
 ###########################
 
 #' Get code, t number, full name and phylogeny of all organisms in KEGG:
+#'
+#' @return A \code{data.frame} with the KEGG T number, organism code, species
+#'   names, and phylogeny for all organisms available in KEGG. Each row
+#'   represents one organism and the columns are \code{Tnumber},
+#'   \code{organismCode}, \code{speciesNames}, and \code{phylogeny}.
+#'
+#' @examples
+#' \dontrun{
+#' head(get_OrganismsCodes())
+#' }
+#'
+#' @export
 get_OrganismsCodes=function(){
   if(!requireNamespace("KEGGREST", quietly = TRUE)){
     stop("Package KEGGREST needed for this function to work. Please install it: BiocManager::install('KEGGREST').",
@@ -141,7 +192,18 @@ get_OrganismsCodes=function(){
 }
 
 #' Get vector with paths numbers that occur in the given organism, named with the full path name:
+#'
 #' @param org_code TODO.
+#' @return A named \code{character} vector with the pathway identifiers
+#'   available for the specified organism, where each value is an organism-specific
+#'   pathway code and each name is the corresponding KEGG pathway name.
+#'
+#' @examples
+#' \dontrun{
+#' head(get_metabPaths_org("hsa"))
+#' }
+#'
+#' @export
 get_metabPaths_org=function(org_code){
   if(!requireNamespace("KEGGREST", quietly = TRUE)){
     stop("Package KEGGREST needed for this function to work. Please install it: BiocManager::install('KEGGREST').",
@@ -175,9 +237,23 @@ get_metabPaths_org=function(org_code){
 #######################################
 
 #' Get only the paths of the organism that contain given compounds:
+#'
 #' @param organism_code TODO.
 #' @param compounds TODO.
 #' @param full.result TODO.
+#' @return A \code{data.frame} with the pathways containing the input compounds.
+#'   Each row represents one matched pathway. When \code{full.result = TRUE}, the
+#'   returned data frame includes the columns \code{pathways}, \code{ratio},
+#'   \code{compounds}, and \code{compounds_names}; otherwise it contains only
+#'   \code{pathways} and \code{ratio}. Row names correspond to pathway names.
+#'
+#' @examples
+#' \dontrun{
+#' cpds <- c(glucose = "cpd:C00031", pyruvate = "cpd:C00022")
+#' head(get_paths_with_cpds_org("hsa", cpds, full.result = FALSE))
+#' }
+#'
+#' @export
 get_paths_with_cpds_org=function(organism_code, compounds, full.result=TRUE){
   if(!requireNamespace("KEGGgraph", quietly = TRUE)){
     stop("Package KEGGgraph needed for this function to work. Please install it: BiocManager::install('KEGGgraph').",
@@ -220,7 +296,20 @@ get_paths_with_cpds_org=function(organism_code, compounds, full.result=TRUE){
 ########################
 
 #' Returns an object of KEGGPathway of the pathway especified in pathcode
+#'
 #' @param pathcode TODO.
+#' @return A \code{KEGGPathway} object corresponding to the pathway specified by
+#'   \code{pathcode}. This object contains the parsed KEGG pathway structure and
+#'   can be used as input to downstream graph conversion and visualization
+#'   functions.
+#'
+#' @examples
+#' \dontrun{
+#' path <- get_MetabolitePath("hsa00010")
+#' class(path)
+#' }
+#'
+#' @export
 get_MetabolitePath=function(pathcode){
   pathObj=KEGGREST::keggGet(pathcode, option="kgml")
   parsedPath=KEGGgraph::parseKGML(pathObj)
@@ -228,13 +317,27 @@ get_MetabolitePath=function(pathcode){
 }
 
 #' Convert KEGGPathway object to graph object
+#'
 #' @param pathObj TODO.
+#' @return A graph object representing the reactions in the input
+#'   \code{KEGGPathway} object. The returned object is suitable for graph-based
+#'   inspection or for use in downstream visualization functions.
+#'
+#' @examples
+#' \dontrun{
+#' path <- get_MetabolitePath("hsa00010")
+#' graph <- convert_keggpathway_2_reactiongraph(path)
+#' class(graph)
+#' }
+#'
+#' @export
 convert_keggpathway_2_reactiongraph=function(pathObj){
   reactionGraphObj=KEGGgraph::KEGGpathway2reactionGraph(pathObj)
   return(reactionGraphObj)
 }
 
 #' Creates the pathway, with reactions included in the nodes
+#'
 #' @param path TODO.
 #' @param path.name TODO.
 #' @param identified_cpds TODO.
@@ -244,6 +347,22 @@ convert_keggpathway_2_reactiongraph=function(pathObj){
 #' @param map.layout TODO.
 #' @param map.width TODO.
 #' @param map.height TODO.
+#' @return A \code{cyjShiny} widget representing the pathway with reactions
+#'   included in the nodes. The widget contains the pathway graph ready for
+#'   interactive visualization, with identified compounds highlighted when they
+#'   are present in the pathway.
+#'
+#' @examples
+#' \dontrun{
+#' path <- get_MetabolitePath("hsa00010")
+#' create_pathway_with_reactions(
+#'   path = path,
+#'   path.name = "hsa00010",
+#'   identified_cpds = c("cpd:C00031", "cpd:C00022")
+#' )
+#' }
+#'
+#' @export
 create_pathway_with_reactions <- function(path, path.name, identified_cpds,
                                           nodeNames = "kegg", nodeTooltip = FALSE,
                                           map.zoom = FALSE, map.layout = "preset",
@@ -448,6 +567,7 @@ create_pathway_with_reactions <- function(path, path.name, identified_cpds,
 
 
 #' Creates the pathway wanted. If any of the given compounds is present in the pathway, it is coloured differently.
+#'
 #' @param compounds TODO.
 #' @param pathway TODO.
 #' @param nodeNames TODO.
@@ -456,10 +576,26 @@ create_pathway_with_reactions <- function(path, path.name, identified_cpds,
 #' @param map.layout TODO.
 #' @param map.width TODO.
 #' @param map.height TODO.
+#' @param verbose Logical indicating whether progress messages should be shown.
+#' @return A \code{cyjShiny} widget representing the selected pathway with the
+#'   input compounds highlighted when present. The returned widget can be printed
+#'   or embedded in an interactive R session to inspect the pathway graph.
+#'
+#' @examples
+#' \dontrun{
+#' pathway_analysis(
+#'   compounds = c(glucose = "cpd:C00031", pyruvate = "cpd:C00022"),
+#'   pathway = "hsa00010",
+#'   verbose = FALSE
+#' )
+#' }
+#'
+#' @export
 pathway_analysis <- function(compounds, pathway,
                              nodeNames = "kegg", nodeTooltip = FALSE,
                              map.zoom = FALSE, map.layout = "preset",
-                             map.width = NULL, map.height = NULL) {
+                             map.width = NULL, map.height = NULL,
+                             verbose = TRUE) {
   if (!requireNamespace("KEGGgraph", quietly = TRUE) &&
       !requireNamespace("KEGGREST", quietly = TRUE) &&
       !requireNamespace("cyjShiny", quietly = TRUE)) {
@@ -522,11 +658,11 @@ pathway_analysis <- function(compounds, pathway,
     )
   }
   
-  message("Getting pathway map\n")
+  if (verbose) message("Getting pathway map")
   pathMap <- get_MetabolitePath(pathway)
   reactionObj <- convert_keggpathway_2_reactiongraph(pathMap)
   
-  message("Creating pathway\n")
+  if (verbose) message("Creating pathway")
   create_pathway_with_reactions(
     pathMap, pathway, compounds,
     nodeNames, nodeTooltip,

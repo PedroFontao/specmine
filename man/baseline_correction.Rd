@@ -6,7 +6,54 @@
 \usage{
 baseline_correction(dataset, method = "modpolyfit", ...)
 }
+\arguments{
+\item{dataset}{Dataset to correct.}
+
+\item{method}{Baseline correction method passed to `baseline::baseline()`.}
+
+\item{...}{Additional arguments passed to `baseline::baseline()`.}
+}
+\value{
+A \code{dataset} object containing the baseline-corrected data. The
+  returned object has the same overall structure as the input dataset, with
+  corrected intensity values stored in \code{dataset$data}, original row and
+  column names preserved, and the description updated to record the baseline
+  correction step.
+}
 \description{
 Auto-exported function: baseline_correction
+}
+\examples{
+\donttest{
+datamatrix <- matrix(
+  c(5, 6, 7,
+    6, 7, 8,
+    7, 8, 9,
+    8, 9, 10,
+    9, 8, 7,
+    8, 7, 6,
+    7, 6, 5,
+    6, 5, 4),
+  nrow = 8,
+  byrow = TRUE,
+  dimnames = list(as.character(1:8), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = c("A", "A", "B"),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(
+  data = datamatrix,
+  metadata = metadata,
+  description = "toy spectra",
+  labels = list(x = "ppm", val = "intensity")
+)
+corrected <- try(
+  baseline_correction(dataset, method = "modpolyfit"),
+  silent = TRUE
+)
+corrected
+}
+
 }
 \keyword{internal}

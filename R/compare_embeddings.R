@@ -3,7 +3,7 @@
 ############################################################################
 
 compare_embeddings = function(dataset, embeddings.list, scale = FALSE, n_neighbors = 5,
-                              write.file = FALSE, file.out = "embedding_comparison") {
+                              write.file = FALSE, file.out = NULL) {
   if (!is.list(embeddings.list) || length(embeddings.list) == 0) {
     stop("embeddings.list must be a non-empty named list.")
   }
@@ -35,8 +35,11 @@ compare_embeddings = function(dataset, embeddings.list, scale = FALSE, n_neighbo
   results_df = do.call(rbind, results)
   rownames(results_df) = NULL
   
-  if (write.file) {
-    write.csv(results_df, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(results_df, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
   }
   
   return(results_df)
@@ -48,7 +51,7 @@ compare_embeddings = function(dataset, embeddings.list, scale = FALSE, n_neighbo
 ############################################################################
 
 compare_clusterings = function(dataset, clusterings.list, scale = FALSE, remove.noise = TRUE,
-                               write.file = FALSE, file.out = "clustering_comparison") {
+                               write.file = FALSE, file.out = NULL) {
   if (!requireNamespace("clusterCrit", quietly = TRUE)) {
     stop("Package 'clusterCrit' is required. Install it with: install.packages('clusterCrit')")
   }
@@ -85,8 +88,11 @@ compare_clusterings = function(dataset, clusterings.list, scale = FALSE, remove.
   results_df = do.call(rbind, results)
   rownames(results_df) = NULL
   
-  if (write.file) {
-    write.csv(results_df, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(results_df, file = paste0(file.out, "_metrics.csv"), row.names = FALSE)
   }
   
   return(results_df)

@@ -14,8 +14,21 @@ remove_x_values_by_interval(dataset, min.value, max.value)
 \item{max.value}{Maximum x value.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where all
+  variables with x values between `min.value` and `max.value`, inclusive,
+  have been removed from `dataset$data`.
 }
 \description{
 Removes x values inside an interval.
+}
+\examples{
+data <- matrix(
+  1:12,
+  nrow = 4,
+  dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+remove_x_values_by_interval(dataset, 15, 35)
+
 }

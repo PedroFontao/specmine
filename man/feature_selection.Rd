@@ -15,7 +15,20 @@ feature_selection(
   subsets = 2^(2:4)
 )
 }
+\value{
+A feature selection object produced by \code{caret}. For \code{method = "rfe"}, this is an \code{rfe} object; for \code{method = "filter"}, this is an \code{sbf} object.
+}
 \description{
 Auto-exported function: feature_selection
+}
+\examples{
+datamat <- matrix(
+  rnorm(20),
+  nrow = 4,
+  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+)
+metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
+dataset <- list(data = datamat, metadata = metadata)
+feature_selection(dataset, "class", method = "filter", functions = caret::rfSBF)
 }
 \keyword{internal}

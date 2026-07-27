@@ -3,14 +3,21 @@
 \docType{data}
 \name{spectra_options}
 \alias{spectra_options}
-\title{Spectra options}
+\title{Spectra processing options}
 \format{
-A named list of options.
+A list containing spectral processing options.
 }
 \usage{
-spectra_options
+data(spectra_options)
+}
+\value{
+A named list of default options used by the package for spectral data processing. Each element stores a processing parameter or lookup table that controls analysis steps such as preprocessing, identification, or scoring.
 }
 \description{
-Default options used by spectra-related utilities in the package.
+Default options used in spectral data processing workflows.
+}
+\examples{
+data(spectra_options)
+names(spectra_options)
 }
 \keyword{datasets}

@@ -35,6 +35,23 @@ create_pathway_with_reactions(
 
 \item{map.height}{TODO.}
 }
+\value{
+A \code{cyjShiny} widget representing the pathway with reactions
+  included in the nodes. The widget contains the pathway graph ready for
+  interactive visualization, with identified compounds highlighted when they
+  are present in the pathway.
+}
 \description{
 Creates the pathway, with reactions included in the nodes
+}
+\examples{
+\dontrun{
+path <- get_MetabolitePath("hsa00010")
+create_pathway_with_reactions(
+  path = path,
+  path.name = "hsa00010",
+  identified_cpds = c("cpd:C00031", "cpd:C00022")
+)
+}
+
 }

@@ -12,7 +12,8 @@ pathway_analysis(
   map.zoom = FALSE,
   map.layout = "preset",
   map.width = NULL,
-  map.height = NULL
+  map.height = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
@@ -31,7 +32,24 @@ pathway_analysis(
 \item{map.width}{TODO.}
 
 \item{map.height}{TODO.}
+
+\item{verbose}{Logical indicating whether progress messages should be shown.}
+}
+\value{
+A \code{cyjShiny} widget representing the selected pathway with the
+  input compounds highlighted when present. The returned widget can be printed
+  or embedded in an interactive R session to inspect the pathway graph.
 }
 \description{
 Creates the pathway wanted. If any of the given compounds is present in the pathway, it is coloured differently.
+}
+\examples{
+\dontrun{
+pathway_analysis(
+  compounds = c(glucose = "cpd:C00031", pyruvate = "cpd:C00022"),
+  pathway = "hsa00010",
+  verbose = FALSE
+)
+}
+
 }

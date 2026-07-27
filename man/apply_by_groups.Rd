@@ -24,16 +24,26 @@ apply_by_groups(
 \item{variable.bounds}{Optional numeric bounds for variables.}
 }
 \value{
-A table of grouped results.
+A matrix-like object with one row per selected variable and one
+  column per group defined by `metadata.var`. Each cell contains the result
+  of applying `fn.to.apply` to the values of that variable within the
+  corresponding group.
 }
 \description{
 Applies a function to groups defined by a metadata variable.
 }
 \examples{
-if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-  data(cachexia, package = "specmine.datasets")
-  apply.groups.result = apply_by_groups(cachexia, "Muscle.loss", mean)
-}
+data <- matrix(
+  c(1, 2, 3, 4, 5, 6),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  group = c("control", "control", "case"),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+apply_by_groups(dataset, "group", mean)
 
 }
 \keyword{apply}

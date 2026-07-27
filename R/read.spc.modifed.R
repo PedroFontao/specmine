@@ -20,6 +20,13 @@
 ##' @author C. Beleites
 ##' @rdname read-spc
 ##' @references Reference information for the SPC file format.
+##' @examples
+##' \donttest{
+##' filename <- system.file("extdata", "toy.spc", package = "specmine")
+##' if (nzchar(filename)) {
+##'   read_spc_nosubhdr(filename)
+##' }
+##' }
 ##' @export
 read_spc_nosubhdr <- function(filename,
                               keys.hdr2data = c("fexper", "fres", "fsource"),

@@ -14,8 +14,24 @@ remove_samples(dataset, samples.to.remove, rebuild.factors = TRUE)
 \item{rebuild.factors}{Logical. If TRUE, rebuild factors in metadata.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, with the
+  selected samples removed from both `dataset$data` and `dataset$metadata`.
+  If `rebuild.factors` is `TRUE`, unused factor levels in metadata are dropped.
 }
 \description{
 Removes samples from a dataset.
+}
+\examples{
+data <- matrix(
+  1:9,
+  nrow = 3,
+  dimnames = list(c("x1", "x2", "x3"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "B", "A")),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+remove_samples(dataset, "s2")
+
 }

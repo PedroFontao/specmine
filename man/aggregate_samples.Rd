@@ -18,17 +18,34 @@ the last two samples).}
 \item{meta.to.remove}{Metadata variables to be removed.}
 }
 \value{
-Returns the dataset with the samples aggregated.
+A dataset object in which samples have been aggregated according to
+  `indexes` and `aggreg.fn`, with updated `data`, `metadata`, and preserved
+  dataset-level fields such as labels, type, and description.
 }
 \description{
 Aggregate samples according to an aggregate function like mean, median, etc.
 This can be used to merge replicates.
 }
 \examples{
-if (requireNamespace("specmine.datasets", quietly = TRUE)) {
-  data(propolis, package = "specmine.datasets")
-  dataset = aggregate_samples(propolis, as.integer(propolis$metadata$seasons), "mean")
-}
+data <- matrix(
+  c(1, 2, 10, 12,
+    3, 4, 14, 16),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3", "s4"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "A", "B", "B")),
+  batch = c(1, 1, 2, 2),
+  row.names = c("s1", "s2", "s3", "s4")
+)
+dataset <- list(
+  data = data,
+  metadata = metadata,
+  labels = list(),
+  type = "example",
+  description = "toy dataset"
+)
+aggregate_samples(dataset, c(1, 1, 2, 2), "mean")
 
 }
 \keyword{aggregation}

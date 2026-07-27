@@ -2,7 +2,6 @@
 ################################ UMAP ######################################
 ############################################################################
 
-
 # perform umap analysis
 # n_components - number of dimensions in the embedding (default: 2)
 # n_neighbors  - number of nearest neighbours (controls local vs global structure)
@@ -14,7 +13,7 @@
 # write.file   - if TRUE, saves the embedding to a CSV file
 # file.out     - base name for output file
 
-umap_analysis_dataset = function(dataset, n_components = 2, n_neighbors = 15, min_dist = 0.1, metric = "euclidean", scale = FALSE, ret_model = FALSE, seed = 42, write.file = FALSE, file.out = "umap", ...) {
+umap_analysis_dataset = function(dataset, n_components = 2, n_neighbors = 15, min_dist = 0.1, metric = "euclidean", scale = FALSE, ret_model = FALSE, seed = 42, write.file = FALSE, file.out = NULL, ...) {
   mat_check = as.matrix(dataset$data)
   if (any(is.na(mat_check)) || any(is.nan(mat_check)) || any(is.infinite(mat_check))) {
     stop("dataset$data contains NA, NaN or Inf values. Please clean your data first.")
@@ -24,29 +23,25 @@ umap_analysis_dataset = function(dataset, n_components = 2, n_neighbors = 15, mi
   if (scale) mat = scale(mat)
   set.seed(seed)
   umap_model = uwot::umap(mat, n_components = n_components, n_neighbors = n_neighbors, min_dist = min_dist, metric = metric, ret_model = ret_model, ...)
-  if (ret_model) { embedding = umap_model$embedding } else { embedding = umap_model }
+  if (ret_model) { 
+    embedding = umap_model$embedding 
+  } else { 
+    embedding = umap_model 
+  }
   rownames(embedding) = colnames(dataset$data)
   colnames(embedding) = paste0("UMAP", seq_len(n_components))
-  if (write.file) write.csv(embedding, file = paste0(file.out, "_embedding.csv"))
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
+    utils::write.csv(embedding, file = paste0(file.out, "_embedding.csv"))
+  }
   result = list(embedding = embedding, params = list(n_components = n_components, n_neighbors = n_neighbors, min_dist = min_dist, metric = metric, scale = scale, seed = seed))
   if (ret_model) result$model = umap_model
   return(result)
 }
 
-
 ########################## UMAP PLOTS ##################################
-
-
-# 2d scores plot
-# column.class - name of metadata column to colour points by
-# dims         - which UMAP dimensions to plot (default: c(1,2))
-# labels       - if TRUE, shows sample names next to points
-# ellipses     - if TRUE, draws confidence ellipses per group
-# bw           - if TRUE, uses black and white with shapes instead of colours
-# pallette     - colour palette index for scale_colour_brewer
-# leg.pos      - legend position ("right", "left", "top", "bottom")
-# xlim         - optional x axis limits c(min, max)
-# ylim         - optional y axis limits c(min, max)
 
 umap_scoresplot2D = function(dataset, umap.result, column.class = NULL, dims = c(1,2), labels = FALSE, ellipses = FALSE, bw = FALSE, pallette = 2, leg.pos = "right", xlim = NULL, ylim = NULL) {
   has.legend = FALSE
@@ -83,12 +78,6 @@ umap_scoresplot2D = function(dataset, umap.result, column.class = NULL, dims = c
   umap.plot
 }
 
-
-# 3d scores plot (uses plotly)
-# column.class - name of metadata column to colour points by
-# dims         - which UMAP dimensions to plot (default: c(1,2,3))
-# title        - plot title
-
 umap_scoresplot3D = function(dataset, umap.result, column.class = NULL, dims = c(1,2,3), title = "UMAP 3D Scores Plot") {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   emb = umap.result$embedding
@@ -103,11 +92,6 @@ umap_scoresplot3D = function(dataset, umap.result, column.class = NULL, dims = c
   plotly::plot_ly(df, x = ~UMAP1, y = ~UMAP2, z = ~UMAP3, color = ~Group, type = "scatter3d", mode = "markers") %>% plotly::layout(title = title)
 }
 
-
-# pairs plot for multiple UMAP components
-# column.class - name of metadata column to colour points by
-# dims         - which UMAP dimensions to include (default: first 5)
-
 umap_pairs_plot = function(dataset, umap.result, column.class = NULL, dims = 1:min(5, ncol(umap.result$embedding)), ...) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")
   emb = umap.result$embedding
@@ -120,18 +104,6 @@ umap_pairs_plot = function(dataset, umap.result, column.class = NULL, dims = 1:m
   pairs.df$group = group.values
   GGally::ggpairs(pairs.df, mapping = ggplot2::aes(color = group), ...)
 }
-
-
-# kmeans clustering with 2 UMAP dimensions
-# num.clusters  - number of k-means clusters
-# dims          - which UMAP dimensions to plot (default: c(1,2))
-# kmeans.result - optional pre-computed clustering result (from clustering())
-# labels        - if TRUE, shows sample names next to points
-# bw            - if TRUE, uses black and white with shapes instead of colours
-# ellipses      - if TRUE, draws confidence ellipses per group
-# leg.pos       - legend position
-# xlim          - optional x axis limits c(min, max)
-# ylim          - optional y axis limits c(min, max)
 
 umap_kmeans_plot2D = function(dataset, umap.result, num.clusters = 3, dims = c(1,2), kmeans.result = NULL, labels = FALSE, bw = FALSE, ellipses = FALSE, leg.pos = "right", xlim = NULL, ylim = NULL) {
   emb = umap.result$embedding
@@ -159,13 +131,6 @@ umap_kmeans_plot2D = function(dataset, umap.result, num.clusters = 3, dims = c(1
   umap.plot
 }
 
-
-# kmeans clustering with 3 UMAP dimensions (uses plotly)
-# num.clusters  - number of k-means clusters
-# dims          - which UMAP dimensions to plot (default: c(1,2,3))
-# kmeans.result - optional pre-computed clustering result (from clustering())
-# title         - plot title
-
 umap_kmeans_plot3D = function(dataset, umap.result, num.clusters = 3, dims = c(1,2,3), kmeans.result = NULL, title = "UMAP 3D K-means Plot") {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   emb = umap.result$embedding
@@ -176,12 +141,6 @@ umap_kmeans_plot3D = function(dataset, umap.result, num.clusters = 3, dims = c(1
   df$Group = factor(kmeans.result$cluster)
   plotly::plot_ly(df, x = ~UMAP1, y = ~UMAP2, z = ~UMAP3, color = ~Group, type = "scatter3d", mode = "markers") %>% plotly::layout(title = title)
 }
-
-
-# pairs plot with kmeans clusters
-# num.clusters  - number of k-means clusters
-# dims          - which UMAP dimensions to include (default: first 5)
-# kmeans.result - optional pre-computed clustering result (from clustering())
 
 umap_pairs_kmeans_plot = function(dataset, umap.result, num.clusters = 3, kmeans.result = NULL, dims = 1:min(5, ncol(umap.result$embedding))) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")

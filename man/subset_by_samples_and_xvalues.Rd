@@ -27,8 +27,26 @@ subset_by_samples_and_xvalues(
 \item{rebuild.factors}{If TRUE, rebuild factors in metadata.}
 }
 \value{
-Subset dataset.
+A dataset object with the same overall structure as the input,
+  containing only the selected samples and selected x values. The returned
+  object includes the corresponding subset of `dataset$data` and matching
+  rows of `dataset$metadata`; factor levels are rebuilt when
+  `rebuild.factors = TRUE`.
 }
 \description{
 Selects samples and x values simultaneously.
+}
+\examples{
+data <- matrix(
+  1:12,
+  nrow = 4,
+  dimnames = list(c("10", "20", "30", "40"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = factor(c("A", "B", "A")),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+subset_by_samples_and_xvalues(dataset, samples = c(1, 3), variables = c("10", "30"))
+
 }

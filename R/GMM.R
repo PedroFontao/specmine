@@ -2,8 +2,6 @@
 ################################ GMM #######################################
 ############################################################################
 
-
-
 # perform Gaussian Mixture Model clustering
 # num.clusters - number of mixture components; if NULL, selected automatically by BIC
 # model.names  - models to be fitted by mclust (default: NULL = all valid models)
@@ -13,8 +11,7 @@
 # write.file   - if TRUE, saves cluster assignments to a CSV file
 # file.out     - base name for output file
 
-
-gmm_analysis_dataset = function(dataset, num.clusters = NULL, model.names = NULL, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = "gmm", ...) {
+gmm_analysis_dataset = function(dataset, num.clusters = NULL, model.names = NULL, scale = FALSE, seed = 42, ret_model = FALSE, write.file = FALSE, file.out = NULL, ...) {
   if (!requireNamespace("mclust", quietly = TRUE)) stop("Package 'mclust' is required. Install it with: install.packages('mclust')")
   
   mat_check = as.matrix(dataset$data)
@@ -45,29 +42,27 @@ gmm_analysis_dataset = function(dataset, num.clusters = NULL, model.names = NULL
   
   if (ret_model) result$model = gmm_model
   
-  if (write.file) {
+  if (isTRUE(write.file)) {
+    if (is.null(file.out) || !nzchar(file.out)) {
+      stop("Please provide 'file.out' when write.file = TRUE.")
+    }
     out = data.frame(
       sample = names(clusters),
       cluster = clusters,
       uncertainty = gmm_model$uncertainty
     )
-    write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
+    utils::write.csv(out, file = paste0(file.out, "_clusters.csv"), row.names = FALSE)
   }
   
   return(result)
 }
 
-
-
 ############################## GMM PLOTS ###################################
-
-
 
 # helper function to choose coordinates for plotting
 # method      - one of "pca", "umap", "tsne", "ica"
 # result.obj  - result object for methods that require it (umap/tsne/ica)
 # dims        - dimensions to plot
-
 
 .get_gmm_plot_data = function(dataset, method = "pca", result.obj = NULL, dims = c(1,2), scale = FALSE) {
   method = tolower(method)
@@ -100,19 +95,7 @@ gmm_analysis_dataset = function(dataset, num.clusters = NULL, model.names = NULL
   plot.df
 }
 
-
-
 # 2d plot for GMM clusters
-# method      - coordinates used for plotting: "pca", "umap", "tsne", "ica"
-# result.obj  - result object when method is umap/tsne/ica
-# dims        - dimensions to plot
-# labels      - if TRUE, shows sample names next to points
-# bw          - if TRUE, uses black and white with shapes instead of colours
-# leg.pos     - legend position
-# xlim        - optional x axis limits c(min, max)
-# ylim        - optional y axis limits c(min, max)
-
-
 gmm_plot2D = function(dataset, gmm.result, method = "pca", result.obj = NULL, dims = c(1,2), labels = FALSE, bw = FALSE, leg.pos = "right", xlim = NULL, ylim = NULL, scale = FALSE) {
   plot.df = .get_gmm_plot_data(dataset, method = method, result.obj = result.obj, dims = dims, scale = scale)
   plot.df$group = factor(gmm.result$cluster)
@@ -149,15 +132,7 @@ gmm_plot2D = function(dataset, gmm.result, method = "pca", result.obj = NULL, di
   p
 }
 
-
-
 # 3d plot for GMM clusters (uses plotly)
-# method      - coordinates used for plotting: "umap", "tsne", "ica"
-# result.obj  - result object with embedding
-# dims        - dimensions to plot
-# title       - plot title
-
-
 gmm_plot3D = function(dataset, gmm.result, method = "umap", result.obj, dims = c(1,2,3), title = NULL) {
   if (!requireNamespace("plotly", quietly = TRUE)) stop("Package 'plotly' is required. Install it with: install.packages('plotly')")
   
@@ -189,13 +164,7 @@ gmm_plot3D = function(dataset, gmm.result, method = "umap", result.obj, dims = c
   ) %>% plotly::layout(title = title)
 }
 
-
-
 # pairs plot for GMM clusters
-# result.obj  - result object with embedding
-# dims        - dimensions to include (default: first 5)
-
-
 gmm_pairs_plot = function(dataset, gmm.result, result.obj, dims = 1:min(5, ncol(result.obj$embedding)), ...) {
   if (!requireNamespace("GGally", quietly = TRUE)) stop("Package 'GGally' is required. Install it with: install.packages('GGally')")
   
@@ -208,26 +177,13 @@ gmm_pairs_plot = function(dataset, gmm.result, result.obj, dims = 1:min(5, ncol(
   GGally::ggpairs(pairs.df, mapping = ggplot2::aes(color = group), ...)
 }
 
-
-
 # BIC plot for GMM model selection
-# shows the selected BIC surface stored in mclust result
-
-
 gmm_bic_plot = function(gmm.result) {
   if (is.null(gmm.result$model)) stop("gmm.result$model is required. Run gmm_analysis_dataset(..., ret_model = TRUE).")
   plot(gmm.result$model, what = "BIC")
 }
 
-
-
 # uncertainty plot for GMM
-# method      - coordinates used for plotting: "pca", "umap", "tsne", "ica"
-# result.obj  - result object when method is umap/tsne/ica
-# dims        - dimensions to plot
-# leg.pos     - legend position
-
-
 gmm_uncertainty_plot2D = function(dataset, gmm.result, method = "pca", result.obj = NULL, dims = c(1,2), leg.pos = "right", xlim = NULL, ylim = NULL, scale = FALSE) {
   plot.df = .get_gmm_plot_data(dataset, method = method, result.obj = result.obj, dims = dims, scale = scale)
   plot.df$uncertainty = gmm.result$uncertainty

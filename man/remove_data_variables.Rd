@@ -14,8 +14,21 @@ remove_data_variables(dataset, variables.to.remove, by.index = FALSE)
 \item{by.index}{Logical. If TRUE, variables.to.remove are indexes.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where the
+  selected rows of `dataset$data` have been removed. If no matching variables
+  are found, the input dataset is returned unchanged and a warning is issued.
 }
 \description{
 Removes x variables from a dataset.
+}
+\examples{
+data <- matrix(
+  1:9,
+  nrow = 3,
+  dimnames = list(c("10", "20", "30"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(class = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+remove_data_variables(dataset, "20")
+
 }

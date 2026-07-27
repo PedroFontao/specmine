@@ -10,8 +10,20 @@ count_missing_values(dataset)
 \item{dataset}{Dataset to inspect.}
 }
 \value{
-Total missing values.
+A single numeric value giving the total count of `NA` entries present
+  in `dataset$data`.
 }
 \description{
 Returns the total number of missing values in the dataset.
+}
+\examples{
+data <- matrix(
+  c(1, NA, 3, 4),
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2"))
+)
+metadata <- data.frame(class = c("A", "B"), row.names = c("s1", "s2"))
+dataset <- list(data = data, metadata = metadata)
+count_missing_values(dataset)
+
 }

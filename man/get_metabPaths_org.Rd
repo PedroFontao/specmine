@@ -9,6 +9,17 @@ get_metabPaths_org(org_code)
 \arguments{
 \item{org_code}{TODO.}
 }
+\value{
+A named \code{character} vector with the pathway identifiers
+  available for the specified organism, where each value is an organism-specific
+  pathway code and each name is the corresponding KEGG pathway name.
+}
 \description{
 Get vector with paths numbers that occur in the given organism, named with the full path name:
+}
+\examples{
+\dontrun{
+head(get_metabPaths_org("hsa"))
+}
+
 }

@@ -67,6 +67,7 @@ Suggests:
     scatterplot3d,
     specmine.datasets,
     uwot,
+    randomForest,
     xcms
 VignetteBuilder: knitr
 Description: Provides methods for metabolomics and spectral data analysis,

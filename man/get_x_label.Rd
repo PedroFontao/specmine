@@ -10,8 +10,27 @@ get_x_label(dataset)
 \item{dataset}{Dataset object.}
 }
 \value{
-Character string with the x-axis label.
+A character string giving the label of the x axis stored in
+  `dataset$labels$x`. If no x-axis label has been defined, the function
+  returns an empty string.
 }
 \description{
 Returns the x-axis label associated with the dataset.
+}
+\examples{
+datamatrix <- matrix(
+  c(1, 2, 3, 4),
+  nrow = 2,
+  dimnames = list(c("10.5", "11.0"), c("s1", "s2"))
+)
+metadata <- data.frame(class = c("A", "B"), row.names = c("s1", "s2"))
+dataset <- create_dataset(
+  datamatrix,
+  type = "concentrations",
+  metadata = metadata,
+  label.x = "ppm",
+  label.values = "intensity"
+)
+get_x_label(dataset)
+
 }

@@ -4,7 +4,8 @@ read_dataset_spc <- function(folder.data, filename.meta = NULL,
                              label.values = NULL,
                              header.col.meta = TRUE,
                              header.row.meta = TRUE,
-                             sep.meta = ",") {
+                             sep.meta = ",",
+                             verbose = TRUE) {
   
   if (!is.null(filename.meta)) {
     metadata <- read_metadata(
@@ -17,7 +18,7 @@ read_dataset_spc <- function(folder.data, filename.meta = NULL,
     metadata <- NULL
   }
   
-  data.spc <- read_data_spc(folder.data, nosubhdr = nosubhdr)
+  data.spc <- read_data_spc(folder.data, nosubhdr = nosubhdr, verbose = verbose)
   
   freqs <- data.spc[[1]]$wavelength
   datamat <- matrix(NA, nrow = length(freqs), ncol = length(data.spc))
@@ -50,13 +51,13 @@ read_dataset_spc <- function(folder.data, filename.meta = NULL,
 }
 
 
-read_data_spc <- function(foldername, nosubhdr = FALSE) {
+read_data_spc <- function(foldername, nosubhdr = FALSE, verbose = TRUE) {
   filenames <- dir(foldername, pattern = "\\.[Ss][Pp][Cc]$", full.names = TRUE)
   sampleList <- vector("list", length(filenames))
   sampleNames <- gsub("\\.[^.]*$", "", basename(filenames))
   
   for (i in seq_along(filenames)) {
-    print(paste("Reading sample", filenames[i]))
+    if (verbose) message("Reading sample ", filenames[i])
     sampleList[[i]] <- read_spc_nosubhdr(
       filenames[i],
       no.object = TRUE,

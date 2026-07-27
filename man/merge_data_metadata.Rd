@@ -24,8 +24,24 @@ merge_data_metadata(
 \item{by.index}{Logical. If TRUE, x.values are indexes.}
 }
 \value{
-A data frame with merged data and metadata.
+A `data.frame` containing the selected data matrix, transposed so that
+  samples are rows, combined with the selected metadata columns.
 }
 \description{
 Merges data and metadata into a data frame.
+}
+\examples{
+data <- matrix(
+  1:6,
+  nrow = 2,
+  dimnames = list(c("x1", "x2"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(
+  class = c("A", "B", "A"),
+  batch = c(1, 1, 2),
+  row.names = c("s1", "s2", "s3")
+)
+dataset <- list(data = data, metadata = metadata)
+merge_data_metadata(dataset, metadata.vars = "class")
+
 }

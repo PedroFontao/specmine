@@ -7,15 +7,34 @@
 impute_nas_knn(dataset, k = 10, ...)
 }
 \arguments{
-\item{dataset}{Dataset to modify.}
+\item{dataset}{A dataset object to modify.}
 
-\item{k}{Number of neighbors.}
+\item{k}{Number of neighbors to use in the imputation procedure.}
 
 \item{...}{Additional arguments passed to `impute::impute.knn()`.}
 }
 \value{
-Modified dataset.
+A dataset object with the same structure as the input, where missing
+  values in `dataset$data` have been imputed using the k-nearest neighbors
+  method implemented in `impute::impute.knn()`. The returned object preserves
+  the remaining dataset components unchanged.
 }
 \description{
-Impute missing values with kNN
+Replace missing values using k-nearest neighbors imputation.
+}
+\examples{
+\donttest{
+data <- matrix(
+  c(1,  2, NA, 4,
+    2,  3,  4, 5,
+    3, NA,  5, 6,
+    4,  5,  6, 7),
+  nrow = 4,
+  byrow = TRUE,
+  dimnames = list(c("x1", "x2", "x3", "x4"), c("s1", "s2", "s3", "s4"))
+)
+dataset <- list(data = data)
+impute_nas_knn(dataset, k = 2)
+}
+
 }

@@ -6,7 +6,23 @@
 \usage{
 get_files_list_per_assay(studyID)
 }
+\arguments{
+\item{studyID}{Character string with the MetaboLights study identifier.}
+}
+\value{
+A named \code{list} of \code{data.frame} objects, one per assay, each containing
+  the sample names and corresponding file names for the specified study. Each data frame has
+  two columns: \code{Samples}, with sample identifiers, and \code{Files}, with the associated
+  raw or spectral data file names available in MetaboLights.
+}
 \description{
 Auto-exported function: get_files_list_per_assay
+}
+\examples{
+\dontrun{
+assays <- get_files_list_per_assay("MTBLS1")
+names(assays)
+}
+
 }
 \keyword{internal}

@@ -14,8 +14,20 @@ subset_x_values(dataset, variables, by.index = FALSE)
 \item{by.index}{Logical. If TRUE, variables are interpreted as row indexes.}
 }
 \value{
-Dataset with selected x values.
+A dataset object with the same structure as the input, where
+  `dataset$data` contains only the selected variables or row indexes.
 }
 \description{
 Selects rows of the dataset by x values or by row index.
+}
+\examples{
+data <- matrix(
+  1:9,
+  nrow = 3,
+  dimnames = list(c("10", "20", "30"), c("s1", "s2", "s3"))
+)
+metadata <- data.frame(group = c("A", "B", "A"), row.names = c("s1", "s2", "s3"))
+dataset <- list(data = data, metadata = metadata)
+subset_x_values(dataset, c("10", "30"))
+
 }
