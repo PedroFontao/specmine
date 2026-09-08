@@ -14,35 +14,68 @@ pca_scoresplot3D_rgl(
 )
 }
 \arguments{
-\item{dataset}{Dataset used in the PCA.}
+\item{dataset}{Dataset used in the PCA. Its data matrix must contain
+variables in rows and samples in columns.}
 
-\item{pca.result}{PCA result object.}
+\item{pca.result}{PCA result object of class \code{prcomp} or
+\code{princomp}.}
 
-\item{column.class}{Optional metadata column used for colouring groups.}
+\item{column.class}{Optional metadata column used for colouring sample
+groups.}
 
-\item{pcas}{Principal components to plot.}
+\item{pcas}{Integer vector of length three specifying the principal
+components to plot.}
 
-\item{size}{Point size.}
+\item{size}{Numeric point size passed to \code{rgl::plot3d()}.}
 
 \item{labels}{Logical indicating whether sample labels should be shown.}
 }
 \value{
-No return value, called for its side effect of plotting.
+Invisibly returns the object produced by
+  \code{rgl::plot3d()}; the three-dimensional plot is also drawn as a side
+  effect.
 }
 \description{
-Creates an interactive 3D PCA scores plot.
+Creates an interactive three-dimensional PCA scores plot using
+\code{rgl}.
+}
+\details{
+Samples are represented as points in the selected principal component
+space. When \code{column.class} is supplied, point colours represent the
+corresponding metadata groups.
 }
 \examples{
 \donttest{
-datamat <- matrix(
-  rnorm(20),
-  nrow = 4,
-  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
-)
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_res <- pca_analysis_dataset(dataset)
-pca_scoresplot3D_rgl(dataset, pca_res, column.class = "class")
+if (requireNamespace("rgl", quietly = TRUE)) {
+  options(rgl.useNULL = TRUE)
+
+  datamat <- matrix(
+    rnorm(40),
+    nrow = 4,
+    ncol = 10,
+    dimnames = list(
+      paste0("feature", 1:4),
+      paste0("sample", 1:10)
+    )
+  )
+
+  dataset <- list(
+    data = datamat,
+    metadata = data.frame(
+      class = factor(rep(c("A", "B"), each = 5))
+    )
+  )
+
+  pca.result <- pca_analysis_dataset(dataset)
+
+  pca_scoresplot3D_rgl(
+    dataset,
+    pca.result,
+    column.class = "class",
+    pcas = c(1, 2, 3),
+    labels = TRUE
+  )
+}
 }
 
 }

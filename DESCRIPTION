@@ -1,7 +1,7 @@
 Package: specmine
 Type: Package
 Title: Metabolomics and Spectral Data Analysis and Mining
-Version: 3.1.8
+Version: 4.0.0
 Authors@R: c(
     person(given = "Christopher", family = "Costa",
            email = "chrisbcl@hotmail.com", role = "aut"),
@@ -34,6 +34,7 @@ Imports:
     impute,
     imputeTS,
     MASS,
+    Matrix,
     methods,
     Metrics,
     narray,
@@ -84,4 +85,4 @@ BugReports: https://github.com/PedroFontao/specmine/issues
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: Python (>= 3.5.2), Python module 'nmrglue'
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0

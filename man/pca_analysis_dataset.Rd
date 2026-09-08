@@ -2,7 +2,7 @@
 % Please edit documentation in R/pca.R
 \name{pca_analysis_dataset}
 \alias{pca_analysis_dataset}
-\title{Auto-exported function: pca_analysis_dataset}
+\title{Classical PCA analysis}
 \usage{
 pca_analysis_dataset(
   dataset,
@@ -14,35 +14,85 @@ pca_analysis_dataset(
 )
 }
 \arguments{
-\item{dataset}{Dataset to analyse.}
+\item{dataset}{Dataset to analyse. The numeric data matrix must be stored
+in \code{dataset$data}, with variables in rows and samples in columns.}
 
-\item{scale}{Logical indicating whether variables should be scaled.}
+\item{scale}{Logical indicating whether variables should be scaled before
+PCA. The default is \code{TRUE}.}
 
-\item{center}{Logical indicating whether variables should be centered.}
+\item{center}{Logical indicating whether variables should be centred before
+PCA. The default is \code{TRUE}.}
 
-\item{write.file}{Logical indicating whether scores and loadings should be written to files.}
+\item{write.file}{Logical indicating whether the PCA scores and loadings
+should be written to CSV files.}
 
-\item{file.out}{Output file prefix used when \code{write.file = TRUE}.}
+\item{file.out}{Output file prefix used when
+\code{write.file = TRUE}. Two files are created:
+\code{<file.out>_scores.csv} and
+\code{<file.out>_loadings.csv}.}
 
-\item{...}{Additional arguments passed to \code{prcomp()}.}
+\item{...}{Additional arguments passed to
+\code{stats::prcomp()}.}
 }
 \value{
-An object of class \code{prcomp} containing PCA results. The
-  \code{x} component stores sample scores and the \code{rotation} component
-  stores variable loadings.
+An object of class \code{prcomp}. The returned object contains:
+\itemize{
+  \item \code{x}: a matrix of PCA scores, with one row per sample;
+  \item \code{rotation}: a matrix of PCA loadings, with one row per
+    variable;
+  \item \code{sdev}: the standard deviations of the principal components;
+  \item \code{center}: the centring values used by the PCA;
+  \item \code{scale}: the scaling values used by the PCA when
+    \code{scale = TRUE};
+  \item \code{call}: the matched function call.
+}
+
+The row names of \code{x} correspond to sample names when the columns of
+\code{dataset$data} are named. The row names of \code{rotation} correspond
+to variable names when the rows of \code{dataset$data} are named.
 }
 \description{
-Auto-exported function: pca_analysis_dataset
+Performs classical Principal Component Analysis (PCA) on a specmine
+dataset using \code{stats::prcomp()}.
+}
+\details{
+The dataset is expected to contain variables in rows and samples in
+columns. The data matrix is transposed internally so that samples are
+treated as observations and variables as features.
 }
 \examples{
 datamat <- matrix(
-  rnorm(20),
+  rnorm(40),
   nrow = 4,
-  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+  ncol = 10,
+  dimnames = list(
+    paste0("feature", 1:4),
+    paste0("sample", 1:10)
+  )
 )
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_res <- pca_analysis_dataset(dataset)
+
+dataset <- list(data = datamat)
+
+pca.result <- pca_analysis_dataset(
+  dataset,
+  scale = TRUE,
+  center = TRUE
+)
+
+dim(pca.result$x)
+dim(pca.result$rotation)
+
+\donttest{
+file.prefix <- file.path(tempdir(), "pca_example")
+
+pca_analysis_dataset(
+  dataset,
+  write.file = TRUE,
+  file.out = file.prefix
+)
+
+file.exists(paste0(file.prefix, "_scores.csv"))
+file.exists(paste0(file.prefix, "_loadings.csv"))
+}
 
 }
-\keyword{internal}

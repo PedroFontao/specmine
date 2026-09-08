@@ -15,36 +15,96 @@ pca_robust(
 )
 }
 \arguments{
-\item{dataset}{Dataset to analyse.}
+\item{dataset}{Dataset to analyse. The numeric data matrix must be stored
+in \code{dataset$data}, with variables in rows and samples in columns.}
 
-\item{center}{Centering method.}
+\item{center}{Method used to centre the data. Common choices are
+\code{"mean"}, \code{"median"} or \code{NULL}, according to the options
+supported by \code{pcaPP::PCAgrid()}.}
 
-\item{scale}{Scaling method.}
+\item{scale}{Method used to scale the data. Common choices are
+\code{"sd"}, \code{"mad"} or \code{NULL}, according to the options
+supported by \code{pcaPP::PCAgrid()}.}
 
-\item{k}{Number of principal components to compute.}
+\item{k}{Number of robust principal components to compute.}
 
-\item{write.file}{Logical indicating whether scores and loadings should be written to files.}
+\item{write.file}{Logical indicating whether the robust PCA scores and
+loadings should be written to CSV files.}
 
-\item{file.out}{Output file prefix used when \code{write.file = TRUE}.}
+\item{file.out}{Output file prefix used when
+\code{write.file = TRUE}. The function creates
+\code{<file.out>_scores.csv} and
+\code{<file.out>_loadings.csv}.}
 
-\item{...}{Additional arguments passed to \code{pcaPP::PCAgrid()}.}
+\item{...}{Additional arguments passed to
+\code{pcaPP::PCAgrid()}.}
 }
 \value{
-An object returned by \code{pcaPP::PCAgrid()}.
+The object returned by \code{pcaPP::PCAgrid()}.
+Depending on the version of \code{pcaPP}, the result contains robust PCA
+scores, loadings, component deviations and the centring and scaling
+information used in the analysis. When scores are available, they can be
+accessed with \code{pca.result$scores}; loadings can be accessed with
+\code{pca.result$loadings}.
 }
 \description{
-Performs robust PCA using \code{pcaPP::PCAgrid()}.
+Performs robust Principal Component Analysis using
+\code{pcaPP::PCAgrid()}.
+}
+\details{
+The dataset is expected to contain variables in rows and samples in
+columns. The data matrix is transposed internally so that samples are
+treated as observations and variables as features.
 }
 \examples{
+if (requireNamespace("pcaPP", quietly = TRUE)) {
+  datamat <- matrix(
+    rnorm(40),
+    nrow = 4,
+    ncol = 10,
+    dimnames = list(
+      paste0("feature", 1:4),
+      paste0("sample", 1:10)
+    )
+  )
+
+  dataset <- list(data = datamat)
+
+  robust.result <- pca_robust(
+    dataset,
+    center = "median",
+    scale = "mad",
+    k = 2
+  )
+
+  is.list(robust.result)
+}
+
 \donttest{
-datamat <- matrix(
-  rnorm(30),
-  nrow = 6,
-  dimnames = list(paste0("x", 1:6), paste0("s", 1:5))
-)
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_robust(dataset, k = 2)
+if (requireNamespace("pcaPP", quietly = TRUE)) {
+  datamat <- matrix(
+    rnorm(40),
+    nrow = 4,
+    ncol = 10,
+    dimnames = list(
+      paste0("feature", 1:4),
+      paste0("sample", 1:10)
+    )
+  )
+
+  dataset <- list(data = datamat)
+  file.prefix <- file.path(tempdir(), "robust_pca_example")
+
+  pca_robust(
+    dataset,
+    k = 2,
+    write.file = TRUE,
+    file.out = file.prefix
+  )
+
+  file.exists(paste0(file.prefix, "_scores.csv"))
+  file.exists(paste0(file.prefix, "_loadings.csv"))
+}
 }
 
 }

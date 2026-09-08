@@ -17,39 +17,53 @@ pca_screeplot(
 )
 }
 \arguments{
-\item{pca.result}{PCA result object.}
+\item{pca.result}{PCA result object inheriting from class \code{prcomp} or
+\code{princomp}.}
 
-\item{num.pcs}{Number of principal components to display.}
+\item{num.pcs}{Optional number of principal components to display. If
+\code{NULL}, all available components are displayed.}
 
-\item{cex.leg}{Legend text size.}
+\item{cex.leg}{Numeric value controlling the legend text size.}
 
-\item{leg.pos}{Legend position.}
+\item{leg.pos}{Legend position accepted by \code{graphics::legend()}.}
 
-\item{lab.text}{Legend labels.}
+\item{lab.text}{Character vector of length two containing the labels for
+the individual and cumulative variance curves.}
 
-\item{fill.col}{Line colours.}
+\item{fill.col}{Character or numeric vector of length two containing the
+colours for the individual and cumulative variance curves.}
 
 \item{ylab}{Y-axis label.}
 
 \item{xlab}{X-axis label.}
 
-\item{...}{Additional graphical parameters.}
+\item{...}{Additional graphical parameters passed to
+\code{graphics::matplot()}.}
 }
 \value{
-No return value, called for its side effect of plotting.
+No return value; the scree plot is drawn as a side effect.
 }
 \description{
-Draws a scree plot with individual and cumulative explained variance.
+Draws a scree plot showing the individual and cumulative percentage of
+variance explained by the principal components.
 }
 \examples{
 datamat <- matrix(
-  rnorm(20),
+  rnorm(40),
   nrow = 4,
-  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+  ncol = 10,
+  dimnames = list(
+    paste0("feature", 1:4),
+    paste0("sample", 1:10)
+  )
 )
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_res <- pca_analysis_dataset(dataset)
-pca_screeplot(pca_res)
+
+dataset <- list(data = datamat)
+pca.result <- pca_analysis_dataset(dataset)
+
+pca_screeplot(
+  pca.result,
+  num.pcs = 4
+)
 
 }

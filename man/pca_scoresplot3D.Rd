@@ -4,34 +4,57 @@
 \alias{pca_scoresplot3D}
 \title{PCA 3D scores plot}
 \usage{
-pca_scoresplot3D(dataset, pca.result, column.class = NULL, pcas = c(1, 2, 3))
+pca_scoresplot3D(
+  dataset,
+  pca.result,
+  column.class = NULL,
+  pcas = c(1, 2, 3),
+  title = "PCA 3D Scores Plot"
+)
 }
 \arguments{
-\item{dataset}{Dataset used in the PCA.}
+\item{dataset}{Dataset used to calculate the PCA.}
 
-\item{pca.result}{PCA result object.}
+\item{pca.result}{Result returned by \code{pca_analysis_dataset()}.}
 
-\item{column.class}{Optional metadata column used for colouring groups.}
+\item{column.class}{Optional metadata column used to colour samples.}
 
-\item{pcas}{Principal components to plot.}
+\item{pcas}{Integer vector of length three specifying the principal
+components to plot.}
+
+\item{title}{Plot title.}
 }
 \value{
-No return value, called for its side effect of plotting.
+A \code{plotly} htmlwidget.
 }
 \description{
-Creates a static 3D PCA scores plot using \code{scatterplot3d}.
+Creates an interactive three-dimensional scores plot from a PCA result.
 }
 \examples{
 \donttest{
-datamat <- matrix(
-  rnorm(20),
-  nrow = 4,
-  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
-)
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_res <- pca_analysis_dataset(dataset)
-pca_scoresplot3D(dataset, pca_res, column.class = "class")
+if (requireNamespace("plotly", quietly = TRUE)) {
+  datamat <- matrix(
+    rnorm(40),
+    nrow = 5,
+    ncol = 8
+  )
+
+  dataset <- list(
+    data = datamat,
+    metadata = data.frame(
+      class = factor(rep(c("A", "B"), length.out = 8))
+    )
+  )
+
+  result <- pca_analysis_dataset(dataset)
+
+  pca_scoresplot3D(
+    dataset,
+    result,
+    column.class = "class",
+    pcas = c(1, 2, 3)
+  )
+}
 }
 
 }

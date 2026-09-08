@@ -2,359 +2,1352 @@
 ################################PCA#########################################
 ############################################################################
 
-# perform pca analysis - classical
-#' 
-#' Auto-exported function: pca_analysis_dataset
+#' Classical PCA analysis
 #'
-#' @param dataset Dataset to analyse.
-#' @param scale Logical indicating whether variables should be scaled.
-#' @param center Logical indicating whether variables should be centered.
-#' @param write.file Logical indicating whether scores and loadings should be written to files.
-#' @param file.out Output file prefix used when \code{write.file = TRUE}.
-#' @param ... Additional arguments passed to \code{prcomp()}.
+#' Performs classical Principal Component Analysis (PCA) on a specmine
+#' dataset using \code{stats::prcomp()}.
 #'
-#' @return An object of class \code{prcomp} containing PCA results. The
-#'   \code{x} component stores sample scores and the \code{rotation} component
-#'   stores variable loadings.
+#' The dataset is expected to contain variables in rows and samples in
+#' columns. The data matrix is transposed internally so that samples are
+#' treated as observations and variables as features.
+#'
+#' @param dataset Dataset to analyse. The numeric data matrix must be stored
+#'   in \code{dataset$data}, with variables in rows and samples in columns.
+#' @param scale Logical indicating whether variables should be scaled before
+#'   PCA. The default is \code{TRUE}.
+#' @param center Logical indicating whether variables should be centred before
+#'   PCA. The default is \code{TRUE}.
+#' @param write.file Logical indicating whether the PCA scores and loadings
+#'   should be written to CSV files.
+#' @param file.out Output file prefix used when
+#'   \code{write.file = TRUE}. Two files are created:
+#'   \code{<file.out>_scores.csv} and
+#'   \code{<file.out>_loadings.csv}.
+#' @param ... Additional arguments passed to
+#'   \code{stats::prcomp()}.
+#'
+#' @return An object of class \code{prcomp}. The returned object contains:
+#' \itemize{
+#'   \item \code{x}: a matrix of PCA scores, with one row per sample;
+#'   \item \code{rotation}: a matrix of PCA loadings, with one row per
+#'     variable;
+#'   \item \code{sdev}: the standard deviations of the principal components;
+#'   \item \code{center}: the centring values used by the PCA;
+#'   \item \code{scale}: the scaling values used by the PCA when
+#'     \code{scale = TRUE};
+#'   \item \code{call}: the matched function call.
+#' }
+#'
+#' The row names of \code{x} correspond to sample names when the columns of
+#' \code{dataset$data} are named. The row names of \code{rotation} correspond
+#' to variable names when the rows of \code{dataset$data} are named.
 #'
 #' @examples
 #' datamat <- matrix(
-#'   rnorm(20),
+#'   rnorm(40),
 #'   nrow = 4,
-#'   dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+#'   ncol = 10,
+#'   dimnames = list(
+#'     paste0("feature", 1:4),
+#'     paste0("sample", 1:10)
+#'   )
 #' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_res <- pca_analysis_dataset(dataset)
 #'
-#' @keywords internal
+#' dataset <- list(data = datamat)
+#'
+#' pca.result <- pca_analysis_dataset(
+#'   dataset,
+#'   scale = TRUE,
+#'   center = TRUE
+#' )
+#'
+#' dim(pca.result$x)
+#' dim(pca.result$rotation)
+#'
+#' \donttest{
+#' file.prefix <- file.path(tempdir(), "pca_example")
+#'
+#' pca_analysis_dataset(
+#'   dataset,
+#'   write.file = TRUE,
+#'   file.out = file.prefix
+#' )
+#'
+#' file.exists(paste0(file.prefix, "_scores.csv"))
+#' file.exists(paste0(file.prefix, "_loadings.csv"))
+#' }
+#'
 #' @export
-pca_analysis_dataset = function(dataset, scale = TRUE, center = TRUE, 
-                                write.file = FALSE, file.out = NULL, ...) {
+pca_analysis_dataset = function(
+    dataset,
+    scale = TRUE,
+    center = TRUE,
+    write.file = FALSE,
+    file.out = NULL,
+    ...
+) {
+  if (!is.list(dataset) || is.null(dataset$data)) {
+    stop("'dataset$data' must be provided.")
+  }
   
-  pca.result = prcomp(t(dataset$data), center = center, scale. = scale, ...)
+  mat = as.matrix(dataset$data)
+  
+  if (!is.numeric(mat)) {
+    stop("'dataset$data' must contain numeric values.")
+  }
+  
+  if (anyNA(mat) || any(!is.finite(mat))) {
+    stop(
+      "'dataset$data' contains NA, NaN or Inf values. ",
+      "Please clean the data before running PCA."
+    )
+  }
+  
+  if (nrow(mat) < 2L || ncol(mat) < 2L) {
+    stop(
+      "'dataset$data' must contain at least two variables ",
+      "and two samples."
+    )
+  }
+  
+  if (!is.logical(scale) || length(scale) != 1L || is.na(scale)) {
+    stop("'scale' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(center) || length(center) != 1L || is.na(center)) {
+    stop("'center' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(write.file) ||
+      length(write.file) != 1L ||
+      is.na(write.file)) {
+    stop("'write.file' must be a single non-missing logical value.")
+  }
+  
+  pca.result = stats::prcomp(
+    t(mat),
+    center = center,
+    scale. = scale,
+    ...
+  )
   
   if (isTRUE(write.file)) {
-    if (is.null(file.out) || !nzchar(file.out)) {
-      stop("Please provide 'file.out' when write.file = TRUE.")
+    if (is.null(file.out) ||
+        length(file.out) != 1L ||
+        !is.character(file.out) ||
+        !nzchar(file.out)) {
+      stop(
+        "Please provide a non-empty 'file.out' when ",
+        "write.file = TRUE."
+      )
     }
-    utils::write.csv(pca.result$x, file = paste0(file.out, "_scores.csv"))
-    utils::write.csv(pca.result$rotation, file = paste0(file.out, "_loadings.csv"))
+    
+    utils::write.csv(
+      pca.result$x,
+      file = paste0(file.out, "_scores.csv")
+    )
+    
+    utils::write.csv(
+      pca.result$rotation,
+      file = paste0(file.out, "_loadings.csv")
+    )
   }
   
   pca.result
 }
 
-# returns information about importance of the PC's
-# pcs - PCs to get; sd - get std dev; prop - get proportion of variance; cumul - get cumulative
-# min.cum - allows to define minimum cumulative % of variance
-pca_importance = function(pca.res, pcs = 1:length(pca.res$sdev), sd = TRUE, prop = TRUE, cumul = TRUE, min.cum = NULL)
-{
-  rows = c()
-  if (sd) rows = c(1)
-  if (prop) rows = c(rows, 2)
-  if (cumul) rows = c(rows, 3)
-  
-  if (inherits(pca.res, "prcomp")){
-    if (!is.null(min.cum)) {
-      cum = summary(pca.res)$importance[3,]
-      pcs = 1:(min(which(cum > min.cum)))
-    }
-    
-    res = summary(pca.res)$importance
-  } else if (inherits(pca.res, "princomp")){
-    vars = pca.res$sdev^2
-    vars = vars/sum(vars)
-    cum = cumsum(vars)
-    if (!is.null(min.cum)) {
-      pcs = 1:(min(which(cum > min.cum)))
-    }
-    res = rbind("Standard deviation" = pca.res$sdev, "Proportion of Variance" = vars, "Cumulative Proportion" = cum)
-  }
-  res[rows, pcs]
-}
-
-# robust PCA analysis 
-
-# center - how the data will be centered "mean" or "median" (or NULL if none)
-# scale - how the data will be scaled "sd" or "mad" (or NULL if none)
-# k - number of PCs to compute
-
-# returns objects of class princomp
-#' Robust PCA analysis
+#' PCA component importance
 #'
-#' Performs robust PCA using \code{pcaPP::PCAgrid()}.
+#' Calculates the standard deviation, proportion of variance and cumulative
+#' proportion of variance explained by selected principal components.
 #'
-#' @param dataset Dataset to analyse.
-#' @param center Centering method.
-#' @param scale Scaling method.
-#' @param k Number of principal components to compute.
-#' @param write.file Logical indicating whether scores and loadings should be written to files.
-#' @param file.out Output file prefix used when \code{write.file = TRUE}.
-#' @param ... Additional arguments passed to \code{pcaPP::PCAgrid()}.
+#' The function accepts PCA results generated by
+#' \code{pca_analysis_dataset()}, \code{stats::prcomp()} or
+#' \code{stats::princomp()}.
 #'
-#' @return An object returned by \code{pcaPP::PCAgrid()}.
+#' @param pca.res An object inheriting from class \code{prcomp} or
+#'   \code{princomp}.
+#' @param pcs Integer vector specifying the principal components to return.
+#'   By default, all available components are returned.
+#' @param sd Logical indicating whether the standard deviation row should be
+#'   returned.
+#' @param prop Logical indicating whether the proportion of variance row
+#'   should be returned.
+#' @param cumul Logical indicating whether the cumulative proportion row
+#'   should be returned.
+#' @param min.cum Optional numeric value between 0 and 1. When supplied,
+#'   components are selected up to the first component whose cumulative
+#'   proportion is greater than or equal to this value.
+#'
+#' @return A numeric matrix with one row for each requested measure:
+#' \code{Standard deviation}, \code{Proportion of Variance} and/or
+#' \code{Cumulative Proportion}. Columns correspond to the selected principal
+#' components.
+#'
+#' For a \code{prcomp} object, the values are calculated from its
+#' \code{sdev} component. For a \code{princomp} object, the same calculation
+#' is applied to its \code{sdev} component.
 #'
 #' @examples
-#' \donttest{
 #' datamat <- matrix(
-#'   rnorm(30),
-#'   nrow = 6,
-#'   dimnames = list(paste0("x", 1:6), paste0("s", 1:5))
+#'   rnorm(40),
+#'   nrow = 4,
+#'   ncol = 10,
+#'   dimnames = list(
+#'     paste0("feature", 1:4),
+#'     paste0("sample", 1:10)
+#'   )
 #' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_robust(dataset, k = 2)
+#'
+#' dataset <- list(data = datamat)
+#' pca.result <- pca_analysis_dataset(dataset)
+#'
+#' pca_importance(
+#'   pca.result,
+#'   pcs = 1:3,
+#'   sd = TRUE,
+#'   prop = TRUE,
+#'   cumul = TRUE
+#' )
+#'
+#' pca_importance(
+#'   pca.result,
+#'   min.cum = 0.90,
+#'   sd = FALSE,
+#'   prop = TRUE,
+#'   cumul = TRUE
+#' )
+#'
+#' @export
+pca_importance = function(
+    pca.res,
+    pcs = 1:length(pca.res$sdev),
+    sd = TRUE,
+    prop = TRUE,
+    cumul = TRUE,
+    min.cum = NULL
+) {
+  if (!inherits(pca.res, c("prcomp", "princomp"))) {
+    stop(
+      "'pca.res' must inherit from class 'prcomp' or 'princomp'."
+    )
+  }
+  
+  if (!is.logical(sd) || length(sd) != 1L || is.na(sd)) {
+    stop("'sd' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(prop) || length(prop) != 1L || is.na(prop)) {
+    stop("'prop' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(cumul) || length(cumul) != 1L || is.na(cumul)) {
+    stop("'cumul' must be a single non-missing logical value.")
+  }
+  
+  if (!is.null(min.cum)) {
+    if (!is.numeric(min.cum) ||
+        length(min.cum) != 1L ||
+        is.na(min.cum) ||
+        min.cum < 0 ||
+        min.cum > 1) {
+      stop("'min.cum' must be a single numeric value between 0 and 1.")
+    }
+  }
+  
+  rows = integer(0)
+  
+  if (isTRUE(sd)) {
+    rows = c(rows, 1L)
+  }
+  
+  if (isTRUE(prop)) {
+    rows = c(rows, 2L)
+  }
+  
+  if (isTRUE(cumul)) {
+    rows = c(rows, 3L)
+  }
+  
+  if (!length(rows)) {
+    stop(
+      "At least one of 'sd', 'prop' or 'cumul' must be TRUE."
+    )
+  }
+  
+  sdev = as.numeric(pca.res$sdev)
+  
+  if (!length(sdev) || any(!is.finite(sdev))) {
+    stop("The PCA result does not contain valid component deviations.")
+  }
+  
+  variance = sdev^2
+  prop.values = variance / sum(variance)
+  cumul.values = cumsum(prop.values)
+  
+  importance = rbind(
+    `Standard deviation` = sdev,
+    `Proportion of Variance` = prop.values,
+    `Cumulative Proportion` = cumul.values
+  )
+  
+  if (!is.null(min.cum)) {
+    selected = which(cumul.values >= min.cum)
+    
+    if (length(selected)) {
+      pcs = seq_len(selected[1])
+    } else {
+      pcs = seq_along(sdev)
+    }
+  }
+  
+  if (!is.numeric(pcs) ||
+      anyNA(pcs) ||
+      any(pcs < 1) ||
+      any(pcs > ncol(importance)) ||
+      any(pcs != as.integer(pcs))) {
+    stop(
+      "'pcs' must contain valid positive integer component indices."
+    )
+  }
+  
+  pcs = as.integer(pcs)
+  
+  importance[rows, pcs, drop = FALSE]
+}
+############################################################################
+# Robust PCA analysis
+############################################################################
+
+#' Robust PCA analysis
+#'
+#' Performs robust Principal Component Analysis using
+#' \code{pcaPP::PCAgrid()}.
+#'
+#' The dataset is expected to contain variables in rows and samples in
+#' columns. The data matrix is transposed internally so that samples are
+#' treated as observations and variables as features.
+#'
+#' @param dataset Dataset to analyse. The numeric data matrix must be stored
+#'   in \code{dataset$data}, with variables in rows and samples in columns.
+#' @param center Method used to centre the data. Common choices are
+#'   \code{"mean"}, \code{"median"} or \code{NULL}, according to the options
+#'   supported by \code{pcaPP::PCAgrid()}.
+#' @param scale Method used to scale the data. Common choices are
+#'   \code{"sd"}, \code{"mad"} or \code{NULL}, according to the options
+#'   supported by \code{pcaPP::PCAgrid()}.
+#' @param k Number of robust principal components to compute.
+#' @param write.file Logical indicating whether the robust PCA scores and
+#'   loadings should be written to CSV files.
+#' @param file.out Output file prefix used when
+#'   \code{write.file = TRUE}. The function creates
+#'   \code{<file.out>_scores.csv} and
+#'   \code{<file.out>_loadings.csv}.
+#' @param ... Additional arguments passed to
+#'   \code{pcaPP::PCAgrid()}.
+#'
+#' @return The object returned by \code{pcaPP::PCAgrid()}.
+#' Depending on the version of \code{pcaPP}, the result contains robust PCA
+#' scores, loadings, component deviations and the centring and scaling
+#' information used in the analysis. When scores are available, they can be
+#' accessed with \code{pca.result$scores}; loadings can be accessed with
+#' \code{pca.result$loadings}.
+#'
+#' @examples
+#' if (requireNamespace("pcaPP", quietly = TRUE)) {
+#'   datamat <- matrix(
+#'     rnorm(40),
+#'     nrow = 4,
+#'     ncol = 10,
+#'     dimnames = list(
+#'       paste0("feature", 1:4),
+#'       paste0("sample", 1:10)
+#'     )
+#'   )
+#'
+#'   dataset <- list(data = datamat)
+#'
+#'   robust.result <- pca_robust(
+#'     dataset,
+#'     center = "median",
+#'     scale = "mad",
+#'     k = 2
+#'   )
+#'
+#'   is.list(robust.result)
+#' }
+#'
+#' \donttest{
+#' if (requireNamespace("pcaPP", quietly = TRUE)) {
+#'   datamat <- matrix(
+#'     rnorm(40),
+#'     nrow = 4,
+#'     ncol = 10,
+#'     dimnames = list(
+#'       paste0("feature", 1:4),
+#'       paste0("sample", 1:10)
+#'     )
+#'   )
+#'
+#'   dataset <- list(data = datamat)
+#'   file.prefix <- file.path(tempdir(), "robust_pca_example")
+#'
+#'   pca_robust(
+#'     dataset,
+#'     k = 2,
+#'     write.file = TRUE,
+#'     file.out = file.prefix
+#'   )
+#'
+#'   file.exists(paste0(file.prefix, "_scores.csv"))
+#'   file.exists(paste0(file.prefix, "_loadings.csv"))
+#' }
 #' }
 #'
 #' @export
-pca_robust = function(dataset, center = "median", scale = "mad", k = 10,
-                      write.file = FALSE, file.out = NULL, ...)
-{
-  pca.res = pcaPP::PCAgrid(t(dataset$data), k = k, center = center, scale = scale, scores = TRUE, ...)
+pca_robust = function(
+    dataset,
+    center = "median",
+    scale = "mad",
+    k = 10,
+    write.file = FALSE,
+    file.out = NULL,
+    ...
+) {
+  if (!requireNamespace("pcaPP", quietly = TRUE)) {
+    stop(
+      "Package 'pcaPP' is required. ",
+      "Install it with install.packages('pcaPP')."
+    )
+  }
+  
+  if (!is.list(dataset) || is.null(dataset$data)) {
+    stop("'dataset$data' must be provided.")
+  }
+  
+  mat = as.matrix(dataset$data)
+  
+  if (!is.numeric(mat)) {
+    stop("'dataset$data' must contain numeric values.")
+  }
+  
+  if (anyNA(mat) || any(!is.finite(mat))) {
+    stop(
+      "'dataset$data' contains NA, NaN or Inf values. ",
+      "Please clean the data before running robust PCA."
+    )
+  }
+  
+  if (nrow(mat) < 2L || ncol(mat) < 2L) {
+    stop(
+      "'dataset$data' must contain at least two variables ",
+      "and two samples."
+    )
+  }
+  
+  if (!is.numeric(k) ||
+      length(k) != 1L ||
+      is.na(k) ||
+      !is.finite(k) ||
+      k < 1 ||
+      k != as.integer(k)) {
+    stop("'k' must be a single positive integer.")
+  }
+  
+  k = as.integer(k)
+  
+  max.components = min(nrow(mat), ncol(mat))
+  
+  if (k > max.components) {
+    stop(
+      "'k' cannot exceed the smaller of the number of variables ",
+      "and samples: ",
+      max.components,
+      "."
+    )
+  }
+  
+  if (!is.logical(write.file) ||
+      length(write.file) != 1L ||
+      is.na(write.file)) {
+    stop("'write.file' must be a single non-missing logical value.")
+  }
+  
+  pca.res = pcaPP::PCAgrid(
+    t(mat),
+    k = k,
+    center = center,
+    scale = scale,
+    scores = TRUE,
+    ...
+  )
   
   if (isTRUE(write.file)) {
-    if (is.null(file.out) || !nzchar(file.out)) {
-      stop("Please provide 'file.out' when write.file = TRUE.")
+    if (is.null(file.out) ||
+        length(file.out) != 1L ||
+        !is.character(file.out) ||
+        !nzchar(file.out)) {
+      stop(
+        "Please provide a non-empty 'file.out' when ",
+        "write.file = TRUE."
+      )
     }
-    utils::write.csv(pca.res$scores, file = paste0(file.out, "_scores.csv"))
-    utils::write.csv(pca.res$loadings, file = paste0(file.out, "_loadings.csv"))
+    
+    utils::write.csv(
+      pca.res$scores,
+      file = paste0(file.out, "_scores.csv")
+    )
+    
+    utils::write.csv(
+      pca.res$loadings,
+      file = paste0(file.out, "_loadings.csv")
+    )
   }
   
   pca.res
 }
 
-
 ########################## PCA PLOTS ##################################
 
-#scree plot
 #' PCA scree plot
 #'
-#' Draws a scree plot with individual and cumulative explained variance.
+#' Draws a scree plot showing the individual and cumulative percentage of
+#' variance explained by the principal components.
 #'
-#' @param pca.result PCA result object.
-#' @param num.pcs Number of principal components to display.
-#' @param cex.leg Legend text size.
-#' @param leg.pos Legend position.
-#' @param lab.text Legend labels.
-#' @param fill.col Line colours.
+#' @param pca.result PCA result object inheriting from class \code{prcomp} or
+#'   \code{princomp}.
+#' @param num.pcs Optional number of principal components to display. If
+#'   \code{NULL}, all available components are displayed.
+#' @param cex.leg Numeric value controlling the legend text size.
+#' @param leg.pos Legend position accepted by \code{graphics::legend()}.
+#' @param lab.text Character vector of length two containing the labels for
+#'   the individual and cumulative variance curves.
+#' @param fill.col Character or numeric vector of length two containing the
+#'   colours for the individual and cumulative variance curves.
 #' @param ylab Y-axis label.
 #' @param xlab X-axis label.
-#' @param ... Additional graphical parameters.
+#' @param ... Additional graphical parameters passed to
+#'   \code{graphics::matplot()}.
 #'
-#' @return No return value, called for its side effect of plotting.
+#' @return No return value; the scree plot is drawn as a side effect.
 #'
 #' @examples
 #' datamat <- matrix(
-#'   rnorm(20),
+#'   rnorm(40),
 #'   nrow = 4,
-#'   dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+#'   ncol = 10,
+#'   dimnames = list(
+#'     paste0("feature", 1:4),
+#'     paste0("sample", 1:10)
+#'   )
 #' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_res <- pca_analysis_dataset(dataset)
-#' pca_screeplot(pca_res)
+#'
+#' dataset <- list(data = datamat)
+#' pca.result <- pca_analysis_dataset(dataset)
+#'
+#' pca_screeplot(
+#'   pca.result,
+#'   num.pcs = 4
+#' )
 #'
 #' @export
-pca_screeplot = function(pca.result, num.pcs = NULL, cex.leg = 0.8, leg.pos = "right", 
-                         lab.text = c("individual percent","cumulative percent"), 
-                         fill.col = c("blue","red"), ylab = "Percentage", xlab = "Principal components",
-                         ...){
-  importance = pca_importance(pca.result)
-  if (is.null(num.pcs)) num.pcs = dim(importance)[2]
-  opar=par(mfrow=c(1,1))
-  on.exit(par(opar))
-  matplot(seq(1, num.pcs), data.frame(t(importance[2:3,1:num.pcs]*100)), type="l", lty=1, col=fill.col, 
-          xaxt='n', ylab= ylab,xlab=xlab, ...)
-  legend(leg.pos, lab.text, cex=cex.leg, fill=fill.col)
-  axis(1, at = 1:dim(importance)[2],labels= colnames(importance))
+pca_screeplot = function(
+    pca.result,
+    num.pcs = NULL,
+    cex.leg = 0.8,
+    leg.pos = "right",
+    lab.text = c(
+      "individual percent",
+      "cumulative percent"
+    ),
+    fill.col = c("blue", "red"),
+    ylab = "Percentage",
+    xlab = "Principal components",
+    ...
+) {
+  if (!inherits(pca.result, c("prcomp", "princomp"))) {
+    stop(
+      "'pca.result' must inherit from class 'prcomp' or 'princomp'."
+    )
+  }
+  
+  if (length(lab.text) != 2L) {
+    stop("'lab.text' must contain exactly two labels.")
+  }
+  
+  if (length(fill.col) != 2L) {
+    stop("'fill.col' must contain exactly two colours.")
+  }
+  
+  total.pcs = length(pca.result$sdev)
+  
+  if (is.null(num.pcs)) {
+    num.pcs = total.pcs
+  }
+  
+  if (!is.numeric(num.pcs) ||
+      length(num.pcs) != 1L ||
+      is.na(num.pcs) ||
+      !is.finite(num.pcs) ||
+      num.pcs < 1 ||
+      num.pcs != as.integer(num.pcs) ||
+      num.pcs > total.pcs) {
+    stop(
+      "'num.pcs' must be a single positive integer not greater ",
+      "than the number of available principal components."
+    )
+  }
+  
+  num.pcs = as.integer(num.pcs)
+  
+  importance = pca_importance(
+    pca.res = pca.result,
+    pcs = seq_len(num.pcs),
+    sd = FALSE,
+    prop = TRUE,
+    cumul = TRUE
+  )
+  
+  individual = as.numeric(
+    importance["Proportion of Variance", ]
+  ) * 100
+  
+  cumulative = as.numeric(
+    importance["Cumulative Proportion", ]
+  ) * 100
+  
+  old.par = graphics::par(
+    mfrow = c(1, 1),
+    no.readonly = TRUE
+  )
+  
+  on.exit(
+    graphics::par(old.par),
+    add = TRUE
+  )
+  
+  graphics::matplot(
+    x = seq_len(num.pcs),
+    y = cbind(individual, cumulative),
+    type = "l",
+    lty = 1,
+    lwd = 2,
+    col = fill.col,
+    pch = c(16, 16),
+    xaxt = "n",
+    ylab = ylab,
+    xlab = xlab,
+    ...
+  )
+  
+  graphics::axis(
+    side = 1,
+    at = seq_len(num.pcs),
+    labels = paste0("PC", seq_len(num.pcs))
+  )
+  
+  graphics::legend(
+    x = leg.pos,
+    legend = lab.text,
+    col = fill.col,
+    lty = 1,
+    lwd = 2,
+    pch = 16,
+    cex = cex.leg,
+    bty = "n"
+  )
+  
+  invisible(NULL)
 }
 
-#2d scores plot
 #' PCA 2D scores plot
 #'
-#' Creates a 2D PCA scores plot.
+#' Creates a two-dimensional PCA scores plot.
 #'
-#' @param dataset Dataset used in the PCA.
-#' @param pca.result PCA result object.
-#' @param column.class Optional metadata column used for colouring groups.
-#' @param pcas Principal components to plot.
+#' The function accepts results from \code{pca_analysis_dataset()},
+#' \code{stats::prcomp()} or \code{stats::princomp()}.
+#'
+#' @param dataset Dataset used in the PCA. Its data matrix must contain
+#'   variables in rows and samples in columns.
+#' @param pca.result PCA result object of class \code{prcomp} or
+#'   \code{princomp}.
+#' @param column.class Optional metadata column used for colouring or grouping
+#'   samples.
+#' @param pcas Integer vector of length two specifying the principal
+#'   components to plot.
 #' @param labels Logical indicating whether sample labels should be shown.
 #' @param ellipses Logical indicating whether group ellipses should be drawn.
-#' @param bw Logical indicating whether a black-and-white style should be used.
-#' @param pallette Brewer palette identifier.
+#' @param bw Logical indicating whether a black-and-white style should be
+#'   used.
+#' @param pallette RColorBrewer palette identifier. The argument name
+#'   \code{pallette} is retained for compatibility with previous versions.
 #' @param leg.pos Legend position.
-#' @param xlim Optional x-axis limits.
-#' @param ylim Optional y-axis limits.
+#' @param xlim Optional numeric vector of length two defining the x-axis
+#'   limits.
+#' @param ylim Optional numeric vector of length two defining the y-axis
+#'   limits.
 #'
-#' @return A \code{ggplot} object.
+#' @return A \code{ggplot} object containing the PCA scores plot. The plotted
+#'   points represent samples, and their coordinates are the selected PCA
+#'   scores. When \code{column.class} is supplied, point colours or shapes
+#'   represent the corresponding metadata groups.
 #'
 #' @examples
-#' \donttest{
 #' datamat <- matrix(
-#'   rnorm(20),
+#'   rnorm(40),
 #'   nrow = 4,
-#'   dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+#'   ncol = 10,
+#'   dimnames = list(
+#'     paste0("feature", 1:4),
+#'     paste0("sample", 1:10)
+#'   )
 #' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_res <- pca_analysis_dataset(dataset)
-#' pca_scoresplot2D(dataset, pca_res, column.class = "class")
-#' }
+#'
+#' dataset <- list(
+#'   data = datamat,
+#'   metadata = data.frame(
+#'     class = factor(rep(c("A", "B"), each = 5))
+#'   )
+#' )
+#'
+#' pca.result <- pca_analysis_dataset(dataset)
+#'
+#' pca_scoresplot2D(
+#'   dataset,
+#'   pca.result,
+#'   column.class = "class",
+#'   pcas = c(1, 2),
+#'   labels = TRUE
+#' )
 #'
 #' @export
-pca_scoresplot2D = function(dataset, pca.result, column.class = NULL, pcas = c(1,2), labels = FALSE, 
-                            ellipses = FALSE, bw=FALSE, pallette = 2, leg.pos = "right", xlim = NULL, ylim = NULL)
-{
-  has.legend = FALSE
-  if (inherits(pca.result, "prcomp")){
-    scores = pca.result$x
-  } else if (inherits(pca.result, "princomp")){
-    scores = pca.result$scores
+pca_scoresplot2D = function(
+    dataset,
+    pca.result,
+    column.class = NULL,
+    pcas = c(1, 2),
+    labels = FALSE,
+    ellipses = FALSE,
+    bw = FALSE,
+    pallette = 2,
+    leg.pos = "right",
+    xlim = NULL,
+    ylim = NULL
+) {
+  if (!inherits(pca.result, c("prcomp", "princomp"))) {
+    stop(
+      "'pca.result' must inherit from class 'prcomp' or 'princomp'."
+    )
   }
-  pca.points = data.frame(scores[,pcas])
-  names(pca.points) = c("x","y")
-  if (is.null(column.class)){
-    group.values = factor(rep(4, ncol(dataset$data)))
+  
+  if (!is.list(dataset) || is.null(dataset$data)) {
+    stop("'dataset$data' must be provided.")
+  }
+  
+  if (!is.matrix(dataset$data) && !is.data.frame(dataset$data)) {
+    stop("'dataset$data' must be a matrix or data frame.")
+  }
+  
+  scores = if (inherits(pca.result, "prcomp")) {
+    pca.result$x
   } else {
-    group.values = dataset$metadata[,column.class]
+    pca.result$scores
+  }
+  
+  if (is.null(scores) || !is.matrix(scores)) {
+    stop("PCA scores are not available in 'pca.result'.")
+  }
+  
+  if (!is.numeric(pcas) ||
+      length(pcas) != 2L ||
+      anyNA(pcas) ||
+      any(!is.finite(pcas)) ||
+      any(pcas < 1) ||
+      any(pcas != as.integer(pcas)) ||
+      any(pcas > ncol(scores))) {
+    stop(
+      "'pcas' must contain exactly two valid principal component indices."
+    )
+  }
+  
+  pcas = as.integer(pcas)
+  
+  n.samples = nrow(scores)
+  
+  if (n.samples != ncol(dataset$data)) {
+    stop(
+      "The number of PCA scores must match the number of samples."
+    )
+  }
+  
+  if (!is.logical(labels) ||
+      length(labels) != 1L ||
+      is.na(labels)) {
+    stop("'labels' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(ellipses) ||
+      length(ellipses) != 1L ||
+      is.na(ellipses)) {
+    stop("'ellipses' must be a single non-missing logical value.")
+  }
+  
+  if (!is.logical(bw) ||
+      length(bw) != 1L ||
+      is.na(bw)) {
+    stop("'bw' must be a single non-missing logical value.")
+  }
+  
+  if (!is.numeric(xlim) ||
+      length(xlim) != 2L ||
+      anyNA(xlim) ||
+      any(!is.finite(xlim))) {
+    if (!is.null(xlim)) {
+      stop("'xlim' must be NULL or a numeric vector of length two.")
+    }
+  }
+  
+  if (!is.numeric(ylim) ||
+      length(ylim) != 2L ||
+      anyNA(ylim) ||
+      any(!is.finite(ylim))) {
+    if (!is.null(ylim)) {
+      stop("'ylim' must be NULL or a numeric vector of length two.")
+    }
+  }
+  
+  if (is.null(column.class)) {
+    group.values = factor(rep("Samples", n.samples))
+    has.legend = FALSE
+  } else {
+    if (is.null(dataset$metadata) ||
+        !column.class %in% colnames(dataset$metadata)) {
+      stop(
+        "'column.class' was not found in 'dataset$metadata'."
+      )
+    }
+    
+    group.values = factor(dataset$metadata[[column.class]])
+    
+    if (length(group.values) != n.samples) {
+      stop(
+        "'column.class' must contain one value for each sample."
+      )
+    }
+    
     has.legend = TRUE
   }
-  pca.points$group = group.values
-  pca.points$label = colnames(dataset$data)
-  if (bw) shape.values = 1:length(levels(group.values))
-  if (bw)
-    pca.plot = ggplot2::ggplot(data = pca.points, ggplot2::aes_string(x='x', y='y', shape='group'))
-  else
-    pca.plot = ggplot2::ggplot(data = pca.points, ggplot2::aes_string(x='x', y='y',colour='group')) 
-  pca.plot = pca.plot + ggplot2::geom_point(size=3, alpha=1) 
-  if (bw) 
-    pca.plot = pca.plot + ggplot2::scale_shape_manual(values = shape.values)
-  else
-    pca.plot = pca.plot + ggplot2::scale_colour_brewer(type = "qual", palette=pallette) 
+  
+  sample.labels = rownames(scores)
+  
+  if (is.null(sample.labels)) {
+    sample.labels = colnames(dataset$data)
+  }
+  
+  if (is.null(sample.labels)) {
+    sample.labels = paste0(
+      "Sample",
+      seq_len(n.samples)
+    )
+  }
+  
+  if (length(sample.labels) != n.samples) {
+    sample.labels = paste0(
+      "Sample",
+      seq_len(n.samples)
+    )
+  }
+  
+  pca.points = data.frame(
+    x = as.numeric(scores[, pcas[1]]),
+    y = as.numeric(scores[, pcas[2]]),
+    group = group.values,
+    label = sample.labels,
+    check.names = FALSE
+  )
+  
+  if (bw) {
+    pca.plot = ggplot2::ggplot(
+      pca.points,
+      ggplot2::aes(
+        x = .data[["x"]],
+        y = .data[["y"]],
+        shape = .data[["group"]]
+      )
+    ) +
+      ggplot2::scale_shape_manual(
+        values = seq_along(levels(group.values))
+      ) +
+      ggplot2::theme_bw()
+  } else {
+    pca.plot = ggplot2::ggplot(
+      pca.points,
+      ggplot2::aes(
+        x = .data[["x"]],
+        y = .data[["y"]],
+        colour = .data[["group"]]
+      )
+    ) +
+      ggplot2::scale_colour_brewer(
+        type = "qual",
+        palette = pallette
+      ) +
+      ggplot2::theme(
+        legend.position = leg.pos
+      )
+  }
+  
+  importance = pca_importance(
+    pca.res = pca.result,
+    pcs = pcas,
+    sd = FALSE,
+    prop = TRUE,
+    cumul = FALSE
+  )
+  
+  explained = as.numeric(
+    importance["Proportion of Variance", ]
+  ) * 100
+  
   pca.plot = pca.plot +
-    ggplot2::xlab(paste(paste("PC",pcas[1]," -",sep=""), paste(pca_importance(pca.result, pcas[1], sd=FALSE, prop=TRUE, cumul = FALSE)*100,"%",sep=""))) + 
-    ggplot2::ylab(paste(paste("PC",pcas[2]," -",sep=""), paste(pca_importance(pca.result, pcas[2], sd=FALSE, prop=TRUE, cumul = FALSE)*100,"%",sep="")))
-  if (has.legend) {
-    if (bw) pca.plot = pca.plot + ggplot2::theme_bw() 
-    else pca.plot = pca.plot + ggplot2::theme(legend.position = leg.pos)
+    ggplot2::geom_point(
+      size = 3,
+      alpha = 0.8
+    ) +
+    ggplot2::xlab(
+      paste0(
+        "PC",
+        pcas[1],
+        " - ",
+        formatC(explained[1], format = "f", digits = 2),
+        "%"
+      )
+    ) +
+    ggplot2::ylab(
+      paste0(
+        "PC",
+        pcas[2],
+        " - ",
+        formatC(explained[2], format = "f", digits = 2),
+        "%"
+      )
+    ) +
+    ggplot2::ggtitle("PCA 2D Scores Plot")
+  
+  if (!is.null(xlim)) {
+    pca.plot = pca.plot +
+      ggplot2::coord_cartesian(
+        xlim = xlim
+      )
   }
-  if (!is.null(xlim)){
-    pca.plot = pca.plot + ggplot2::xlim(xlim[1],xlim[2])
+  
+  if (!is.null(ylim)) {
+    pca.plot = pca.plot +
+      ggplot2::coord_cartesian(
+        ylim = ylim
+      )
   }
-  if (!is.null(ylim)){
-    pca.plot = pca.plot + ggplot2::ylim(ylim[1],ylim[2])
+  
+  if (labels) {
+    pca.plot = pca.plot +
+      ggplot2::geom_text(
+        ggplot2::aes(
+          label = .data[["label"]]
+        ),
+        hjust = -0.1,
+        vjust = 0,
+        size = 3
+      )
   }
-  if (labels){
-    pca.plot = pca.plot + ggplot2::geom_text(data = pca.points, ggplot2::aes_string(x = 'x',y = 'y',label='label'),hjust=-0.1, vjust=0)
-  }
-  if (!bw & ellipses){
+  
+  if (!bw && ellipses) {
+    if (!requireNamespace("ellipse", quietly = TRUE)) {
+      stop(
+        "Package 'ellipse' is required when ellipses = TRUE."
+      )
+    }
+    
     df.ellipses = calculate_ellipses(pca.points)
-    pca.plot = pca.plot + ggplot2::geom_path(data=df.ellipses, ggplot2::aes_string(x='x', y='y',colour='group'), size=1, linetype=2) 
+    
+    if (nrow(df.ellipses) > 0) {
+      pca.plot = pca.plot +
+        ggplot2::geom_path(
+          data = df.ellipses,
+          ggplot2::aes(
+            x = .data[["x"]],
+            y = .data[["y"]],
+            colour = .data[["group"]]
+          ),
+          linewidth = 1,
+          linetype = 2,
+          inherit.aes = FALSE
+        )
+    }
   }
+  
+  if (!has.legend) {
+    pca.plot = pca.plot +
+      ggplot2::theme(
+        legend.position = "none"
+      )
+  }
+  
   pca.plot
 }
 
-#3d scores plot
 #' PCA 3D scores plot using rgl
 #'
-#' Creates an interactive 3D PCA scores plot.
+#' Creates an interactive three-dimensional PCA scores plot using
+#' \code{rgl}.
 #'
-#' @param dataset Dataset used in the PCA.
-#' @param pca.result PCA result object.
-#' @param column.class Optional metadata column used for colouring groups.
-#' @param pcas Principal components to plot.
-#' @param size Point size.
+#' Samples are represented as points in the selected principal component
+#' space. When \code{column.class} is supplied, point colours represent the
+#' corresponding metadata groups.
+#'
+#' @param dataset Dataset used in the PCA. Its data matrix must contain
+#'   variables in rows and samples in columns.
+#' @param pca.result PCA result object of class \code{prcomp} or
+#'   \code{princomp}.
+#' @param column.class Optional metadata column used for colouring sample
+#'   groups.
+#' @param pcas Integer vector of length three specifying the principal
+#'   components to plot.
+#' @param size Numeric point size passed to \code{rgl::plot3d()}.
 #' @param labels Logical indicating whether sample labels should be shown.
 #'
-#' @return No return value, called for its side effect of plotting.
+#' @return Invisibly returns the object produced by
+#'   \code{rgl::plot3d()}; the three-dimensional plot is also drawn as a side
+#'   effect.
 #'
 #' @examples
 #' \donttest{
-#' datamat <- matrix(
-#'   rnorm(20),
-#'   nrow = 4,
-#'   dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
-#' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_res <- pca_analysis_dataset(dataset)
-#' pca_scoresplot3D_rgl(dataset, pca_res, column.class = "class")
+#' if (requireNamespace("rgl", quietly = TRUE)) {
+#'   options(rgl.useNULL = TRUE)
+#'
+#'   datamat <- matrix(
+#'     rnorm(40),
+#'     nrow = 4,
+#'     ncol = 10,
+#'     dimnames = list(
+#'       paste0("feature", 1:4),
+#'       paste0("sample", 1:10)
+#'     )
+#'   )
+#'
+#'   dataset <- list(
+#'     data = datamat,
+#'     metadata = data.frame(
+#'       class = factor(rep(c("A", "B"), each = 5))
+#'     )
+#'   )
+#'
+#'   pca.result <- pca_analysis_dataset(dataset)
+#'
+#'   pca_scoresplot3D_rgl(
+#'     dataset,
+#'     pca.result,
+#'     column.class = "class",
+#'     pcas = c(1, 2, 3),
+#'     labels = TRUE
+#'   )
+#' }
 #' }
 #'
 #' @export
-pca_scoresplot3D_rgl = function(dataset, pca.result, column.class = NULL, pcas = c(1,2,3), size = 1, 
-                                labels = FALSE) {
+pca_scoresplot3D_rgl = function(
+    dataset,
+    pca.result,
+    column.class = NULL,
+    pcas = c(1, 2, 3),
+    size = 1,
+    labels = FALSE
+) {
   if (!requireNamespace("rgl", quietly = TRUE)) {
-    stop("Package rgl needed for this function to work. Please install it: install.packages('rgl')",
-         call. = FALSE)
+    stop(
+      "Package 'rgl' is required. ",
+      "Install it with install.packages('rgl')."
+    )
   }
   
-  if (inherits(pca.result, "prcomp")){
-    scores = pca.result$x
-  } else if (inherits(pca.result, "princomp")){
-    scores = pca.result$scores
+  if (!inherits(pca.result, c("prcomp", "princomp"))) {
+    stop(
+      "'pca.result' must inherit from class 'prcomp' or 'princomp'."
+    )
   }
-  rgl::plot3d(scores[,pcas], type = "s", col = as.integer(dataset$metadata[,column.class]),
-              size=size)
-  if (labels){
-    rgl::text3d(scores[,pcas],texts=colnames(dataset$data), cex=0.6)
+  
+  if (!is.list(dataset) || is.null(dataset$data)) {
+    stop("'dataset$data' must be provided.")
   }
+  
+  scores = if (inherits(pca.result, "prcomp")) {
+    pca.result$x
+  } else {
+    pca.result$scores
+  }
+  
+  if (is.null(scores) || !is.matrix(scores)) {
+    stop("PCA scores are not available in 'pca.result'.")
+  }
+  
+  if (!is.numeric(pcas) ||
+      length(pcas) != 3L ||
+      anyNA(pcas) ||
+      any(!is.finite(pcas)) ||
+      any(pcas < 1) ||
+      any(pcas != as.integer(pcas)) ||
+      any(pcas > ncol(scores))) {
+    stop(
+      "'pcas' must contain exactly three valid principal component indices."
+    )
+  }
+  
+  pcas = as.integer(pcas)
+  
+  if (nrow(scores) != ncol(dataset$data)) {
+    stop(
+      "The number of PCA scores must match the number of samples."
+    )
+  }
+  
+  if (!is.numeric(size) ||
+      length(size) != 1L ||
+      is.na(size) ||
+      !is.finite(size) ||
+      size <= 0) {
+    stop("'size' must be a single positive numeric value.")
+  }
+  
+  if (!is.logical(labels) ||
+      length(labels) != 1L ||
+      is.na(labels)) {
+    stop("'labels' must be a single non-missing logical value.")
+  }
+  
+  if (is.null(column.class)) {
+    group.values = factor(
+      rep("Samples", nrow(scores))
+    )
+  } else {
+    if (is.null(dataset$metadata) ||
+        !column.class %in% colnames(dataset$metadata)) {
+      stop(
+        "'column.class' was not found in 'dataset$metadata'."
+      )
+    }
+    
+    group.values = droplevels(
+      factor(dataset$metadata[[column.class]])
+    )
+    
+    if (length(group.values) != nrow(scores)) {
+      stop(
+        "'column.class' must contain one value for each sample."
+      )
+    }
+  }
+  
+  group_colours = grDevices::hcl.colors(
+    n = nlevels(group.values),
+    palette = "Dark 3"
+  )
+  
+  point_colours = group_colours[
+    as.integer(group.values)
+  ]
+  
+  sample.labels = rownames(scores)
+  
+  if (is.null(sample.labels)) {
+    sample.labels = colnames(dataset$data)
+  }
+  
+  if (is.null(sample.labels)) {
+    sample.labels = paste0(
+      "Sample",
+      seq_len(nrow(scores))
+    )
+  }
+  
+  if (length(sample.labels) != nrow(scores)) {
+    sample.labels = paste0(
+      "Sample",
+      seq_len(nrow(scores))
+    )
+  }
+  
+  pca.plot = rgl::plot3d(
+    scores[, pcas, drop = FALSE],
+    type = "s",
+    col = point_colours,
+    size = size,
+    xlab = paste0("PC", pcas[1]),
+    ylab = paste0("PC", pcas[2]),
+    zlab = paste0("PC", pcas[3])
+  )
+  
+  if (labels) {
+    rgl::text3d(
+      scores[, pcas, drop = FALSE],
+      texts = sample.labels,
+      cex = 0.6
+    )
+  }
+  
+  invisible(pca.plot)
 }
 
 #' PCA 3D scores plot
 #'
-#' Creates a static 3D PCA scores plot using \code{scatterplot3d}.
+#' Creates an interactive three-dimensional scores plot from a PCA result.
 #'
-#' @param dataset Dataset used in the PCA.
-#' @param pca.result PCA result object.
-#' @param column.class Optional metadata column used for colouring groups.
-#' @param pcas Principal components to plot.
+#' @param dataset Dataset used to calculate the PCA.
+#' @param pca.result Result returned by \code{pca_analysis_dataset()}.
+#' @param column.class Optional metadata column used to colour samples.
+#' @param pcas Integer vector of length three specifying the principal
+#'   components to plot.
+#' @param title Plot title.
 #'
-#' @return No return value, called for its side effect of plotting.
+#' @return A \code{plotly} htmlwidget.
 #'
 #' @examples
 #' \donttest{
-#' datamat <- matrix(
-#'   rnorm(20),
-#'   nrow = 4,
-#'   dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
-#' )
-#' metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-#' dataset <- list(data = datamat, metadata = metadata)
-#' pca_res <- pca_analysis_dataset(dataset)
-#' pca_scoresplot3D(dataset, pca_res, column.class = "class")
+#' if (requireNamespace("plotly", quietly = TRUE)) {
+#'   datamat <- matrix(
+#'     rnorm(40),
+#'     nrow = 5,
+#'     ncol = 8
+#'   )
+#'
+#'   dataset <- list(
+#'     data = datamat,
+#'     metadata = data.frame(
+#'       class = factor(rep(c("A", "B"), length.out = 8))
+#'     )
+#'   )
+#'
+#'   result <- pca_analysis_dataset(dataset)
+#'
+#'   pca_scoresplot3D(
+#'     dataset,
+#'     result,
+#'     column.class = "class",
+#'     pcas = c(1, 2, 3)
+#'   )
+#' }
 #' }
 #'
 #' @export
-pca_scoresplot3D = function(dataset, pca.result, column.class = NULL, pcas=c(1,2,3))
-{
-  if(!requireNamespace("scatterplot3d", quietly = TRUE)){
-    stop("Package scatterplot3d needed for this function to work. Please install it: install.packages('scatterplot3d').",
-         call. = FALSE)
+pca_scoresplot3D = function(
+    dataset,
+    pca.result,
+    column.class = NULL,
+    pcas = c(1, 2, 3),
+    title = "PCA 3D Scores Plot"
+) {
+  if (!requireNamespace("plotly", quietly = TRUE)) {
+    stop(
+      paste0(
+        "Package 'plotly' is required. ",
+        "Install it with install.packages('plotly')."
+      ),
+      call. = FALSE
+    )
   }
   
-  has.legend = FALSE
-  if (inherits(pca.result, "prcomp")){
+  if (inherits(pca.result, "prcomp")) {
     scores = pca.result$x
-  } else if (inherits(pca.result, "princomp")){
+  } else if (inherits(pca.result, "princomp")) {
     scores = pca.result$scores
-  }
-  if (is.null(column.class)){
-    group.values = rep(4, ncol(dataset$data))
   } else {
-    group.values = as.integer(dataset$metadata[,column.class])
-    has.legend = TRUE
+    stop(
+      "'pca.result' must inherit from class 'prcomp' or 'princomp'.",
+      call. = FALSE
+    )
   }
   
-  scatterplot3d::scatterplot3d(scores[,pcas], color=group.values, pch=17)
-  if (has.legend){
-    classes = dataset$metadata[,column.class]
-    legend(-1.5, 2.5, levels(classes), col = 1:length(classes), cex = 0.7, pt.cex = 1, pch= 17)
+  if (is.null(scores) ||
+      !is.matrix(scores) ||
+      ncol(scores) < 3L) {
+    stop(
+      "PCA result must contain at least three principal components.",
+      call. = FALSE
+    )
   }
+  
+  if (!is.numeric(pcas) ||
+      length(pcas) != 3L ||
+      anyNA(pcas) ||
+      any(!is.finite(pcas)) ||
+      any(pcas < 1L) ||
+      any(pcas != as.integer(pcas)) ||
+      any(pcas > ncol(scores))) {
+    stop(
+      "'pcas' must contain three valid principal component indices.",
+      call. = FALSE
+    )
+  }
+  
+  pcas = as.integer(pcas)
+  
+  df = as.data.frame(
+    scores[, pcas, drop = FALSE]
+  )
+  
+  pc_names = paste0(
+    "PC",
+    pcas
+  )
+  
+  colnames(df) = pc_names
+  
+  if (!is.null(column.class) &&
+      !is.null(dataset$metadata) &&
+      column.class %in% colnames(dataset$metadata)) {
+    df$Group = as.factor(
+      dataset$metadata[, column.class]
+    )
+  } else {
+    df$Group = factor(
+      rep("Samples", nrow(df))
+    )
+  }
+  
+  x_formula = stats::as.formula(
+    paste0("~", pc_names[1L])
+  )
+  
+  y_formula = stats::as.formula(
+    paste0("~", pc_names[2L])
+  )
+  
+  z_formula = stats::as.formula(
+    paste0("~", pc_names[3L])
+  )
+  
+  plotly::layout(
+    plotly::plot_ly(
+      data = df,
+      x = x_formula,
+      y = y_formula,
+      z = z_formula,
+      color = ~Group,
+      type = "scatter3d",
+      mode = "markers"
+    ),
+    title = title,
+    scene = list(
+      xaxis = list(
+        title = pc_names[1L]
+      ),
+      yaxis = list(
+        title = pc_names[2L]
+      ),
+      zaxis = list(
+        title = pc_names[3L]
+      )
+    )
+  )
 }
-
-#biplots
 #' PCA biplot
 #'
 #' Draws a PCA biplot for a \code{prcomp} or \code{princomp} result.

@@ -19,45 +19,75 @@ pca_scoresplot2D(
 )
 }
 \arguments{
-\item{dataset}{Dataset used in the PCA.}
+\item{dataset}{Dataset used in the PCA. Its data matrix must contain
+variables in rows and samples in columns.}
 
-\item{pca.result}{PCA result object.}
+\item{pca.result}{PCA result object of class \code{prcomp} or
+\code{princomp}.}
 
-\item{column.class}{Optional metadata column used for colouring groups.}
+\item{column.class}{Optional metadata column used for colouring or grouping
+samples.}
 
-\item{pcas}{Principal components to plot.}
+\item{pcas}{Integer vector of length two specifying the principal
+components to plot.}
 
 \item{labels}{Logical indicating whether sample labels should be shown.}
 
 \item{ellipses}{Logical indicating whether group ellipses should be drawn.}
 
-\item{bw}{Logical indicating whether a black-and-white style should be used.}
+\item{bw}{Logical indicating whether a black-and-white style should be
+used.}
 
-\item{pallette}{Brewer palette identifier.}
+\item{pallette}{RColorBrewer palette identifier. The argument name
+\code{pallette} is retained for compatibility with previous versions.}
 
 \item{leg.pos}{Legend position.}
 
-\item{xlim}{Optional x-axis limits.}
+\item{xlim}{Optional numeric vector of length two defining the x-axis
+limits.}
 
-\item{ylim}{Optional y-axis limits.}
+\item{ylim}{Optional numeric vector of length two defining the y-axis
+limits.}
 }
 \value{
-A \code{ggplot} object.
+A \code{ggplot} object containing the PCA scores plot. The plotted
+  points represent samples, and their coordinates are the selected PCA
+  scores. When \code{column.class} is supplied, point colours or shapes
+  represent the corresponding metadata groups.
 }
 \description{
-Creates a 2D PCA scores plot.
+Creates a two-dimensional PCA scores plot.
+}
+\details{
+The function accepts results from \code{pca_analysis_dataset()},
+\code{stats::prcomp()} or \code{stats::princomp()}.
 }
 \examples{
-\donttest{
 datamat <- matrix(
-  rnorm(20),
+  rnorm(40),
   nrow = 4,
-  dimnames = list(paste0("x", 1:4), paste0("s", 1:5))
+  ncol = 10,
+  dimnames = list(
+    paste0("feature", 1:4),
+    paste0("sample", 1:10)
+  )
 )
-metadata <- data.frame(class = factor(c("A", "A", "B", "B", "A")))
-dataset <- list(data = datamat, metadata = metadata)
-pca_res <- pca_analysis_dataset(dataset)
-pca_scoresplot2D(dataset, pca_res, column.class = "class")
-}
+
+dataset <- list(
+  data = datamat,
+  metadata = data.frame(
+    class = factor(rep(c("A", "B"), each = 5))
+  )
+)
+
+pca.result <- pca_analysis_dataset(dataset)
+
+pca_scoresplot2D(
+  dataset,
+  pca.result,
+  column.class = "class",
+  pcas = c(1, 2),
+  labels = TRUE
+)
 
 }
