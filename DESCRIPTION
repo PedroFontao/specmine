@@ -17,6 +17,8 @@ Authors@R: c(
            email = "pereirinha_bp@hotmail.com", role = "aut"),
     person(given = "Pedro", family = "Fontão",
            email = "pedrofontao812004@gmail.com", role = c("aut", "cre")),
+    person(given = "Rafael", family = "Moreira",
+           email = "rafael8moreira@gmail.com", role = "aut"),
     person(given = "C.", family = "Beleites", role = "cph"),
     person(given = "Jie", family = "Hao", role = "cph"))
 Depends:
